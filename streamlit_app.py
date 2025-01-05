@@ -1,6 +1,10 @@
 import streamlit as st
-import requests
-import json
+from transformers import pipeline
+
+# Initialize the Llama model pipeline
+pipe = pipeline('text-generation', model="meta-llama/Llama-2-7b-hf")
+
+st.title("DxVar - Mendelian Disease Identification")
 
 # Define the initial system message and the user's first message
 messages = [
@@ -19,78 +23,79 @@ for message in messages:
     role = "System" if message["role"] == "system" else "User"
     conversation_history += f"{role}: {message['content']}\n"
 
-# Streamlit UI for variant input
-st.title("DxVar: Mendelian Diseases Assistant")
-st.write("I am here to help you find Mendelian diseases linked to genetic variants.")
-
-chr = st.text_input("Enter chromosome (e.g., 1, X, Y):")
-pos = st.text_input("Enter position:")
-ref = st.text_input("Enter reference base:")
-alt = st.text_input("Enter alternate base:")
-
-# Function to fetch variant information
-def get_variant_info(chr, pos, ref, alt):
+# Function to get variant information from the user
+def get_variant_info():
+    chr = st.text_input("Enter chromosome", "6")
+    pos = st.text_input("Enter position", "160585140")
+    ref = st.text_input("Enter reference base", "T")
+    alt = st.text_input("Enter alternate base", "G")
     genome = "hg38"
-    url = "https://api.genebe.net/cloud/api-public/v1/variant"
-    params = {
-        "chr": chr,
-        "pos": pos,
-        "ref": ref,
-        "alt": alt,
-        "genome": genome
-    }
-    headers = {
-        "Accept": "application/json"
-    }
-    
+    return chr, pos, ref, alt, genome
+
+# Get variant information from the user
+chr, pos, ref, alt, genome = get_variant_info()
+
+# Define the API URL and parameters
+url = "https://api.genebe.net/cloud/api-public/v1/variant"
+params = {
+    "chr": chr,
+    "pos": pos,
+    "ref": ref,
+    "alt": alt,
+    "genome": genome
+}
+
+# Set the headers
+headers = {
+    "Accept": "application/json"
+}
+
+# Make the GET request and display results
+if st.button("Get Variant Info"):
     response = requests.get(url, headers=headers, params=params)
-    return response
 
-# Fetch variant information on button press
-if st.button("Get Variant Information"):
-    if chr and pos and ref and alt:
-        response = get_variant_info(chr, pos, ref, alt)
-
-        if response.status_code == 200:
-            data = response.json()
-
-            if "variants" in data and len(data["variants"]) > 0:
-                variant = data["variants"][0]
-                acmg_classification = variant.get("acmg_classification", "Not Available")
-                effect = variant.get("effect", "Not Available")
-                gene_symbol = variant.get("gene_symbol", "Not Available")
-                gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
-
-                # Update conversation history
-                user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
-                conversation_history += f"User: {user_input}\n"
-
-                # Display the results in Streamlit
-                st.subheader("Variant Information")
-                st.write(f"ACMG Classification: {acmg_classification}")
-                st.write(f"Effect: {effect}")
-                st.write(f"Gene Symbol: {gene_symbol}")
-                st.write(f"Gene HGNC ID: {gene_hgnc_id}")
-                
-                # Handle assistant responses
-                assistant_response = f"The variant you entered has the following information. Possible diseases can be linked to this variant based on clinical knowledge. You can proceed with further analysis using relevant resources."
-                conversation_history += f"Assistant: {assistant_response}\n"
-                st.write(assistant_response)
-
-            else:
-                st.write("No variants found for the provided information.")
+    # Check the response status and extract relevant data
+    if response.status_code == 200:
+        data = response.json()
+        
+        if "variants" in data and len(data["variants"]) > 0:
+            variant = data["variants"][0]  # Get the first variant
+            acmg_classification = variant.get("acmg_classification", "Not Available")
+            effect = variant.get("effect", "Not Available")
+            gene_symbol = variant.get("gene_symbol", "Not Available")
+            gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
+            
+            # Display the results
+            st.write("ACMG Classification:", acmg_classification)
+            st.write("Effect:", effect)
+            st.write("Gene Symbol:", gene_symbol)
+            st.write("Gene HGNC ID:", gene_hgnc_id)
+            
+            # Add the initial variant information to the conversation history
+            user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
+            conversation_history += f"User: {user_input}\n"
+            
         else:
-            st.write(f"Error fetching data: {response.status_code}")
+            st.write("No variants found in response.")
     else:
-        st.write("Please fill in all fields.")
+        st.write("Error:", response.status_code, response.text)
+
+    # After the variant information, continue conversation with the assistant
+    user_input = st.text_input("User: Type your question or exit:", "")
     
-# Ongoing conversation for user interaction
-user_message = st.text_area("Ask a question about this variant:")
-if user_message:
-    conversation_history += f"User: {user_message}\n"
+    if user_input.lower() == "exit":
+        st.write("Goodbye!")
+    else:
+        conversation_history += f"User: {user_input}\n"
 
-    # Simulate assistant's response (this part can be replaced with model calls or other systems)
-    assistant_response = "The variant you provided might have some potential links to certain diseases. Further clinical interpretation is necessary."
+        # Generate the assistant's response using the Llama model
+        outputs = pipe(conversation_history, max_length=512, num_return_sequences=1)
 
-    conversation_history += f"Assistant: {assistant_response}\n"
-    st.write(assistant_response)
+        # Extract the assistant's response
+        response = outputs[0]["generated_text"][len(conversation_history):].strip()
+
+        # Display the assistant's response
+        st.write(f"Assistant: {response}")
+
+        # Add the assistant's response to the conversation history
+        conversation_history += f"Assistant: {response}\n"
