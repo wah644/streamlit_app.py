@@ -3,7 +3,7 @@ import requests
 from groq import Groq
 
 # Initialize Groq API client
-client = Groq()
+client = Groq(API_KEY)
 
 st.title("DxVar - Mendelian Disease Identification")
 
