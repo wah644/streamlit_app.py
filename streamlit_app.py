@@ -19,11 +19,11 @@ messages = [
 ]
 
 # Generate the assistant's response using Groq API
-        groq_messages = [{"role": "user", "content": user_input}]
-        for message in messages:
-            groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
+groq_messages = [{"role": "user", "content": user_input}]
+for message in messages:
+    groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
 
-        completion = client.chat.completions.create(
+completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=groq_messages,
             temperature=1,
