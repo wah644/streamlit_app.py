@@ -18,21 +18,6 @@ messages = [
     },
 ]
 
-# Generate the assistant's response using Groq API
-groq_messages = [{"role": "user", "content": user_input}]
-for message in messages:
-    groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
-
-completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=groq_messages,
-            temperature=1,
-            max_completion_tokens=150,
-            top_p=1,
-            stream=False,
-            stop=None,
-        )
-
 # Initialize the conversation history
 conversation_history = ""
 for message in messages:
@@ -66,6 +51,24 @@ headers = {
     "Accept": "application/json"
 }
 
+# Function to interact with Groq API for assistant responses
+def get_assistant_response(user_input):
+    groq_messages = [{"role": "user", "content": user_input}]
+    for message in messages:
+        groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
+
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=groq_messages,
+        temperature=1,
+        max_completion_tokens=150,
+        top_p=1,
+        stream=False,
+        stop=None,
+    )
+
+    return completion.choices[0].message.content
+
 # Make the GET request and display results
 if st.button("Get Variant Info"):
     response = requests.get(url, headers=headers, params=params)
@@ -89,8 +92,13 @@ if st.button("Get Variant Info"):
             
             # Add the initial variant information to the conversation history
             user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
-            st.write(f"Assistant: {assistant_response}")
+            st.write(f"User: {user_input}")
             conversation_history += f"User: {user_input}\n"
+            
+            # Get and display the assistant's response
+            assistant_response = get_assistant_response(user_input)
+            st.write(f"Assistant: {assistant_response}")
+            conversation_history += f"Assistant: {assistant_response}\n"
             
         else:
             st.write("No variants found in response.")
@@ -105,11 +113,8 @@ if st.button("Get Variant Info"):
     else:
         conversation_history += f"User: {user_input}\n"
 
-        
-
-        # Extract and display the assistant's response
-        assistant_response = completion.choices[0].message.content
-
+        # Get and display the assistant's response
+        assistant_response = get_assistant_response(user_input)
         st.write(f"Assistant: {assistant_response}")
 
         # Add the assistant's response to the conversation history
