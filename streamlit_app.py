@@ -92,7 +92,6 @@ if st.button("Get Variant Info"):
             
             # Add the initial variant information to the conversation history
             user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
-            st.write(f"User: {user_input}")
             conversation_history += f"User: {user_input}\n"
             
             # Get and display the assistant's response
