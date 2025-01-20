@@ -105,7 +105,8 @@ if st.button("Get Variant Info"):
         )
 
         # Extract and display the assistant's response
-        assistant_response = completion.choices[0].message["content"]
+        assistant_response = completion.choices[0].message.content
+
         st.write(f"Assistant: {assistant_response}")
 
         # Add the assistant's response to the conversation history
