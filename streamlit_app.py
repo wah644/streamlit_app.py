@@ -104,17 +104,15 @@ if st.button("Get Variant Info"):
     else:
         st.write("Error:", response.status_code, response.text)
 
-    # After the variant information, continue conversation with the assistant
-    user_input = st.text_input("User: Type your question or exit:", "")
-    
-    if user_input.lower() == "exit":
-        st.write("Goodbye!")
-    else:
-        conversation_history += f"User: {user_input}\n"
+# After the variant information, continue conversation with the assistant
+user_input = st.text_input("User: Type your question or exit:", "")
+if user_input:
+    # Add user's input to the conversation history
+    conversation_history += f"User: {user_input}\n"
 
-        # Get and display the assistant's response
-        assistant_response = get_assistant_response(user_input)
-        st.write(f"Assistant: {assistant_response}")
+    # Get and display the assistant's response
+    assistant_response = get_assistant_response(user_input)
+    st.write(f"Assistant: {assistant_response}")
 
-        # Add the assistant's response to the conversation history
-        conversation_history += f"Assistant: {assistant_response}\n"
+    # Add the assistant's response to the conversation history
+    conversation_history += f"Assistant: {assistant_response}\n"
