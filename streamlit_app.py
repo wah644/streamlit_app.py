@@ -1,15 +1,17 @@
 import streamlit as st
 import requests
 
+# Title of the app
 st.title("DxVar - Clinician Assistant Chatbot")
 
-# Conversation storage
+# Initialize conversation storage
 if "conversation" not in st.session_state:
     st.session_state["conversation"] = []
 
-# User input
+# User input widget
 user_input = st.text_input(
-    "User: Type your variant or question:", key="unique_user_input_key"
+    "User: Type your variant or question:", 
+    key="unique_user_input_key"  # Ensure unique key
 )
 
 # Process user input
@@ -17,19 +19,43 @@ if user_input:
     # Append user input to conversation history
     st.session_state["conversation"].append({"role": "user", "content": user_input})
 
-    # Variant detection (example logic)
-    n_variants = user_input.count(">")  # Count the number of variants in the input
-    if n_variants > 0:
-        st.write(f"Detected {n_variants} variant(s).")
-        # Handle variants (API or custom logic here)
-    else:
-        st.write("No variants detected.")
+    # Variant detection using the GeneBe API
+    try:
+        # Replace with your actual API endpoint and API key
+        GENEBE_API_URL = "https://genebe-api-url.com/process_variant"
+        API_KEY = "your_api_key_here"
+        
+        # Make API request
+        response = requests.post(
+            GENEBE_API_URL,
+            headers={"Authorization": f"Bearer {API_KEY}"},
+            json={"query": user_input}
+        )
+        response_data = response.json()
 
-    # Simulate chatbot response
-    assistant_response = f"Processing your query: {user_input}"
-    st.session_state["conversation"].append(
-        {"role": "assistant", "content": assistant_response}
-    )
+        if response.status_code == 200:
+            # Extract response content
+            detected_variants = response_data.get("detected_variants", [])
+            assistant_response = response_data.get("message", "No detailed response provided.")
+            n_variants = len(detected_variants)
+
+            # Show results
+            if n_variants > 0:
+                st.write(f"Detected {n_variants} variant(s):")
+                for variant in detected_variants:
+                    st.write(f"- {variant}")
+            else:
+                st.write("No variants detected.")
+
+        else:
+            assistant_response = (
+                f"Error processing your query: {response_data.get('error', 'Unknown error')}"
+            )
+    except Exception as e:
+        assistant_response = f"An error occurred: {e}"
+
+    # Add assistant response to conversation history
+    st.session_state["conversation"].append({"role": "assistant", "content": assistant_response})
 
 # Display conversation history
 for message in st.session_state["conversation"]:
