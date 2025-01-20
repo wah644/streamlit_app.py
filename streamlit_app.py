@@ -1,8 +1,8 @@
 import streamlit as st
-from transformers import pipeline
+from groq import Groq
 
-# Initialize the Llama model pipeline
-pipe = pipeline('text-generation', model="meta-llama/Llama-2-7b-hf")
+# Initialize Groq API client
+client = Groq()
 
 st.title("DxVar - Mendelian Disease Identification")
 
@@ -88,14 +88,24 @@ if st.button("Get Variant Info"):
     else:
         conversation_history += f"User: {user_input}\n"
 
-        # Generate the assistant's response using the Llama model
-        outputs = pipe(conversation_history, max_length=512, num_return_sequences=1)
+        # Generate the assistant's response using Groq API
+        groq_messages = [{"role": "user", "content": user_input}]
+        for message in messages:
+            groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
 
-        # Extract the assistant's response
-        response = outputs[0]["generated_text"][len(conversation_history):].strip()
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=groq_messages,
+            temperature=1,
+            max_completion_tokens=150,
+            top_p=1,
+            stream=False,
+            stop=None,
+        )
 
-        # Display the assistant's response
-        st.write(f"Assistant: {response}")
+        # Extract and display the assistant's response
+        assistant_response = completion.choices[0].message["content"]
+        st.write(f"Assistant: {assistant_response}")
 
         # Add the assistant's response to the conversation history
-        conversation_history += f"Assistant: {response}\n"
+        conversation_history += f"Assistant: {assistant_response}\n"
