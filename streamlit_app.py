@@ -24,9 +24,6 @@ for message in messages:
     role = "System" if message["role"] == "system" else "User"
     conversation_history += f"{role}: {message['content']}\n"
 
-# Make the GET request and display results
-if st.button("Get Variant Info"):
-    response = requests.get(url, headers=headers, params=params)
 
 
     user_input = st.text_input("User: Type your question or exit:", "")
