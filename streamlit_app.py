@@ -18,6 +18,21 @@ messages = [
     },
 ]
 
+# Generate the assistant's response using Groq API
+        groq_messages = [{"role": "user", "content": user_input}]
+        for message in messages:
+            groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
+
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=groq_messages,
+            temperature=1,
+            max_completion_tokens=150,
+            top_p=1,
+            stream=False,
+            stop=None,
+        )
+
 # Initialize the conversation history
 conversation_history = ""
 for message in messages:
@@ -90,20 +105,7 @@ if st.button("Get Variant Info"):
     else:
         conversation_history += f"User: {user_input}\n"
 
-        # Generate the assistant's response using Groq API
-        groq_messages = [{"role": "user", "content": user_input}]
-        for message in messages:
-            groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
-
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=groq_messages,
-            temperature=1,
-            max_completion_tokens=150,
-            top_p=1,
-            stream=False,
-            stop=None,
-        )
+        
 
         # Extract and display the assistant's response
         assistant_response = completion.choices[0].message.content
