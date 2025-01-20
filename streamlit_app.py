@@ -2,7 +2,7 @@ import streamlit as st
 from groq import Groq
 
 # Initialize Groq API client
-client = Groq(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)
+client = Groq(api_key="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")
 
 st.title("DxVar - Mendelian Disease Identification")
 
