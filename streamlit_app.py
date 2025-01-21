@@ -24,32 +24,26 @@ for message in messages:
     role = "System" if message["role"] == "system" else "User"
     conversation_history += f"{role}: {message['content']}\n"
 
-# Function to get variant information from the user
-def get_variant_info():
-    chr = st.text_input("Enter chromosome", "6")
-    pos = st.text_input("Enter position", "160585140")
-    ref = st.text_input("Enter reference base", "T")
-    alt = st.text_input("Enter alternate base", "G")
-    genome = "hg38"
-    return chr, pos, ref, alt, genome
+# Function to parse the variant input
+def parse_variant_input(variant):
+    try:
+        # Parse the input string in the format chr6:160585140-T>G
+        chr_pos, ref_alt = variant.split(":")
+        chr = chr_pos.strip("chr")
+        pos = ref_alt.split("-")[0]
+        ref, alt = ref_alt.split(">")[1].split("-")
+        genome = "hg38"
+        return chr, pos, ref, alt, genome
+    except Exception as e:
+        st.error("Invalid input format. Please use 'chr6:160585140-T>G'")
+        return None, None, None, None, None
 
-# Get variant information from the user
-chr, pos, ref, alt, genome = get_variant_info()
+# Get the variant input from the user
+variant_input = st.text_input("Enter variant (e.g., chr6:160585140-T>G)", "")
+chr, pos, ref, alt, genome = parse_variant_input(variant_input)
 
-# Define the API URL and parameters
+# Define the API URL
 url = "https://api.genebe.net/cloud/api-public/v1/variant"
-params = {
-    "chr": chr,
-    "pos": pos,
-    "ref": ref,
-    "alt": alt,
-    "genome": genome
-}
-
-# Set the headers
-headers = {
-    "Accept": "application/json"
-}
 
 # Function to interact with Groq API for assistant responses
 def get_assistant_response(user_input):
@@ -70,7 +64,18 @@ def get_assistant_response(user_input):
     return completion.choices[0].message.content
 
 # Make the GET request and display results
-if st.button("Get Variant Info"):
+if st.button("Get Variant Info") and chr and pos and ref and alt:
+    params = {
+        "chr": chr,
+        "pos": pos,
+        "ref": ref,
+        "alt": alt,
+        "genome": genome
+    }
+    headers = {
+        "Accept": "application/json"
+    }
+
     response = requests.get(url, headers=headers, params=params)
 
     # Check the response status and extract relevant data
@@ -91,7 +96,12 @@ if st.button("Get Variant Info"):
             st.write("Gene HGNC ID:", gene_hgnc_id)
             
             # Add the initial variant information to the conversation history
-            user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
+            user_input = (
+                f"Tell me about the following variant and its possible diseases: "
+                f"Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, "
+                f"ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, "
+                f"Gene HGNC ID: {gene_hgnc_id}"
+            )
             conversation_history += f"User: {user_input}\n"
             
             # Get and display the assistant's response
