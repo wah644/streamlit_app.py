@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from groq import Groq
+import re  # For regex validation
 
 # Initialize Groq API client
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
@@ -24,95 +25,81 @@ for message in messages:
     role = "System" if message["role"] == "system" else "User"
     conversation_history += f"{role}: {message['content']}\n"
 
-# Function to parse the variant input
-def parse_variant_input(variant):
-    try:
-        # Parse the input string in the format chr6:160585140-T>G
-        chr_pos, ref_alt = variant.split(":")
-        chr = chr_pos.strip("chr")
-        pos = ref_alt.split("-")[0]
-        ref, alt = ref_alt.split(">")[1].split("-")
-        genome = "hg38"
-        return chr, pos, ref, alt, genome
-    except Exception as e:
-        st.error("Invalid input format. Please use 'chr6:160585140-T>G'")
-        return None, None, None, None, None
+# Function to parse and validate variant input
+def parse_variant_input(variant_input):
+    """
+    Parse the variant string in the format 'chr6:160585140-T>G'
+    and extract chromosome, position, reference base, and alternate base.
+    """
+    match = re.match(r"^chr(\d+|[XYM]):(\d+)-([ACGT])>([ACGT])$", variant_input)
+    if match:
+        chr, pos, ref, alt = match.groups()
+        return chr, pos, ref, alt
+    return None, None, None, None
 
-# Get the variant input from the user
-variant_input = st.text_input("Enter variant (e.g., chr6:160585140-T>G)", "")
-chr, pos, ref, alt, genome = parse_variant_input(variant_input)
+# Input box for the variant string
+variant_input = st.text_input("Enter the variant in the format 'chr6:160585140-T>G':", "")
 
-# Define the API URL
+# Define the API URL and parameters
 url = "https://api.genebe.net/cloud/api-public/v1/variant"
 
-# Function to interact with Groq API for assistant responses
-def get_assistant_response(user_input):
-    groq_messages = [{"role": "user", "content": user_input}]
-    for message in messages:
-        groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
-
-    completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=groq_messages,
-        temperature=1,
-        max_completion_tokens=150,
-        top_p=1,
-        stream=False,
-        stop=None,
-    )
-
-    return completion.choices[0].message.content
-
 # Make the GET request and display results
-if st.button("Get Variant Info") and chr and pos and ref and alt:
-    params = {
-        "chr": chr,
-        "pos": pos,
-        "ref": ref,
-        "alt": alt,
-        "genome": genome
-    }
-    headers = {
-        "Accept": "application/json"
-    }
-
-    response = requests.get(url, headers=headers, params=params)
-
-    # Check the response status and extract relevant data
-    if response.status_code == 200:
-        data = response.json()
+if st.button("Get Variant Info"):
+    chr, pos, ref, alt = parse_variant_input(variant_input)
+    
+    if chr and pos and ref and alt:
+        genome = "hg38"
+        params = {
+            "chr": chr,
+            "pos": pos,
+            "ref": ref,
+            "alt": alt,
+            "genome": genome,
+        }
         
-        if "variants" in data and len(data["variants"]) > 0:
-            variant = data["variants"][0]  # Get the first variant
-            acmg_classification = variant.get("acmg_classification", "Not Available")
-            effect = variant.get("effect", "Not Available")
-            gene_symbol = variant.get("gene_symbol", "Not Available")
-            gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
-            
-            # Display the results
-            st.write("ACMG Classification:", acmg_classification)
-            st.write("Effect:", effect)
-            st.write("Gene Symbol:", gene_symbol)
-            st.write("Gene HGNC ID:", gene_hgnc_id)
-            
-            # Add the initial variant information to the conversation history
-            user_input = (
-                f"Tell me about the following variant and its possible diseases: "
-                f"Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, "
-                f"ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, "
-                f"Gene HGNC ID: {gene_hgnc_id}"
-            )
-            conversation_history += f"User: {user_input}\n"
-            
-            # Get and display the assistant's response
-            assistant_response = get_assistant_response(user_input)
-            st.write(f"Assistant: {assistant_response}")
-            conversation_history += f"Assistant: {assistant_response}\n"
-            
+        headers = {
+            "Accept": "application/json"
+        }
+
+        # API request
+        response = requests.get(url, headers=headers, params=params)
+
+        # Check the response status and extract relevant data
+        if response.status_code == 200:
+            data = response.json()
+
+            if "variants" in data and len(data["variants"]) > 0:
+                variant = data["variants"][0]  # Get the first variant
+                acmg_classification = variant.get("acmg_classification", "Not Available")
+                effect = variant.get("effect", "Not Available")
+                gene_symbol = variant.get("gene_symbol", "Not Available")
+                gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
+
+                # Display the results
+                st.write("ACMG Classification:", acmg_classification)
+                st.write("Effect:", effect)
+                st.write("Gene Symbol:", gene_symbol)
+                st.write("Gene HGNC ID:", gene_hgnc_id)
+
+                # Add to conversation history
+                user_input = (
+                    f"Tell me about the following variant and its possible diseases: "
+                    f"Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, "
+                    f"ACMG Classification: {acmg_classification}, Effect: {effect}, "
+                    f"Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
+                )
+                conversation_history += f"User: {user_input}\n"
+
+                # Get and display the assistant's response
+                assistant_response = get_assistant_response(user_input)
+                st.write(f"Assistant: {assistant_response}")
+                conversation_history += f"Assistant: {assistant_response}\n"
+            else:
+                st.write("No variants found in response.")
         else:
-            st.write("No variants found in response.")
+            st.write("Error:", response.status_code, response.text)
     else:
-        st.write("Error:", response.status_code, response.text)
+        st.write("Invalid input format. Please enter the variant in the format 'chr6:160585140-T>G'.")
 
 # After the variant information, continue conversation with the assistant
 user_input = st.text_input("User: Type your question or exit:", "")
