@@ -19,15 +19,15 @@ if user_input:
     # Append user input to conversation history
     st.session_state["conversation"].append({"role": "user", "content": user_input})
 
-    # Variant detection using the GeneBe API
+    # Variant analysis using the Groq API
     try:
         # Replace with your actual API endpoint and API key
-        GENEBE_API_URL = "https://genebe-api-url.com/process_variant"
-        API_KEY = "your_api_key_here"
+        GROQ_API_URL = "https://api.groq.com/variant-analysis"
+        API_KEY = "your_groq_api_key_here"
         
         # Make API request
         response = requests.post(
-            GENEBE_API_URL,
+            GROQ_API_URL,
             headers={"Authorization": f"Bearer {API_KEY}"},
             json={"query": user_input}
         )
