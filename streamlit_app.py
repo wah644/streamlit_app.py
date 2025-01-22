@@ -3,6 +3,9 @@ import requests
 from groq import Groq
 parts = []
 
+# Set page configuration
+st.set_page_config(page_title="DxVar", layout="centered")
+
 # Display results with justified text using HTML
 st.markdown("""
     <style>
@@ -16,8 +19,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# App title and description
-st.set_page_config(page_title="DxVar", layout="centered")
+
+
 st.title("DxVar")
 
 # Initialize Groq API client
