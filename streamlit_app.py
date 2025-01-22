@@ -6,6 +6,18 @@ parts = []
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
 
+st.markdown("""
+    <style>
+        .justified-text {
+            text-align: justify;
+        }
+        .results-table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 
 st.title("DxVar")
 
