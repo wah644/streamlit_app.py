@@ -109,10 +109,10 @@ if response.status_code == 200:
         conversation_history += f"Assistant: {assistant_response}\n"
     else:
         st.write("No variants found in the API response.")
-    else:
-        st.write("API Error:", response.status_code, response.text)
-    else:
+else:
+    st.write("API Error:", response.status_code, response.text)
+    
         # Non-variant input, handle as general question
-        assistant_response = get_assistant_response(user_input)
-        st.write(f"Assistant: {assistant_response}")
-        conversation_history += f"User: {user_input}\nAssistant: {assistant_response}\n"
+assistant_response = get_assistant_response(user_input)
+st.write(f"Assistant: {assistant_response}")
+conversation_history += f"User: {user_input}\nAssistant: {assistant_response}\n"
