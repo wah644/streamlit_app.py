@@ -48,71 +48,68 @@ def get_assistant_response(user_input):
 
 # Function to parse variant information
 def get_variant_info(message):
-    parts = message.split(',')
-    if len(parts) == 5 and parts[1].isdigit() and parts[4] == "hg38":
-        print("Message matches the expected format!")
-    else:
-        print("Message does not match the format.")
+    try:
+        parts = message.split(',')
+        if len(parts) == 5 and parts[1].isdigit() and parts[4] == "hg38":
+            st.write("Message matches the expected format!")
+            return parts
+        else:
+            st.write("Message does not match the format.")
+            return []
+    except Exception as e:
+        st.write(f"Error while parsing variant: {e}")
+        return []
 
 # Main Streamlit interaction loop
 conversation_history = ""
 user_input = st.text_input("Enter a genetic variant or a question:")
 
-
-# Parse the variant if present
-assistant_response = get_assistant_response(user_input)
-st.write(f"Assistant: {assistant_response}")
-get_variant_info(assistant_response)
-
-# Define the API URL and parameters
-url = "https://api.genebe.net/cloud/api-public/v1/variant"
-params = {
-    "chr": parts[0],
-    "pos": parts[1],
-    "ref": parts[2],
-    "alt": parts[3],
-    "genome": parts[4]
-}
-
-# Set the headers
-headers = {
-    "Accept": "application/json"
-}
-
-
-response = requests.get(url, headers=headers, params=params)
-
-if response.status_code == 200:
-    data = response.json()
+if user_input:
+    # Get assistant's response
+    assistant_response = get_assistant_response(user_input)
+    st.write(f"Assistant: {assistant_response}")
     
-    if "variants" in data and len(data["variants"]) > 0:
-        variant = data["variants"][0]  # Get the first variant
-        acmg_classification = variant.get("acmg_classification", "Not Available")
-        effect = variant.get("effect", "Not Available")
-        gene_symbol = variant.get("gene_symbol", "Not Available")
-        gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
+    # Parse the variant if present
+    parts = get_variant_info(assistant_response)
+
+    if parts:
+        # Define the API URL and parameters
+        url = "https://api.genebe.net/cloud/api-public/v1/variant"
+        params = {
+            "chr": parts[0],
+            "pos": parts[1],
+            "ref": parts[2],
+            "alt": parts[3],
+            "genome": parts[4]
+        }
+
+        # Set the headers
+        headers = {
+            "Accept": "application/json"
+        }
+
+        # Make API request
+        response = requests.get(url, headers=headers, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            
+            if "variants" in data and len(data["variants"]) > 0:
+                variant = data["variants"][0]  # Get the first variant
+                acmg_classification = variant.get("acmg_classification", "Not Available")
+                effect = variant.get("effect", "Not Available")
+                gene_symbol = variant.get("gene_symbol", "Not Available")
+                gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
 
                 # Display results
-        st.write("### Variant Analysis Results")
-        st.write("ACMG Classification:", acmg_classification)
-        st.write("Effect:", effect)
-        st.write("Gene Symbol:", gene_symbol)
-        st.write("Gene HGNC ID:", gene_hgnc_id)
-
-                # Add to conversation history
-        user_request = f"Chromosome: {variant_info['chr']}, Position: {variant_info['pos']}, Reference Base: {variant_info['ref']}, Alternate Base: {variant_info['alt']}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
-        conversation_history += f"User: {user_request}\n"
-
-                # Get assistant's response
-        assistant_response = get_assistant_response(user_request)
-        st.write(f"Assistant: {assistant_response}")
-        conversation_history += f"Assistant: {assistant_response}\n"
+                st.write("### Variant Analysis Results")
+                st.write("ACMG Classification:", acmg_classification)
+                st.write("Effect:", effect)
+                st.write("Gene Symbol:", gene_symbol)
+                st.write("Gene HGNC ID:", gene_hgnc_id)
+            else:
+                st.write("No variants found in the API response.")
+        else:
+            st.write("API Error:", response.status_code, response.text)
     else:
-        st.write("No variants found in the API response.")
-else:
-    st.write("API Error:", response.status_code, response.text)
-    
-        # Non-variant input, handle as general question
-assistant_response = get_assistant_response(user_input)
-st.write(f"Assistant: {assistant_response}")
-conversation_history += f"User: {user_input}\nAssistant: {assistant_response}\n"
+        st.write("Unable to parse the variant information. Please check your input.")
