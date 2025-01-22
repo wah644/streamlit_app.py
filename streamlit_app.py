@@ -148,15 +148,14 @@ if user_input:
         if response.status_code == 200:
             try:
                 data = response.json()
+                variant = data["variants"][0]  # Get the first variant
+                GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+                GeneBe_results[1] = variant.get("effect", "Not Available")
+                GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+                GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
             except JSONDecodeError as E:
                 pass
                     
-            variant = data["variants"][0]  # Get the first variant
-            GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
-            GeneBe_results[1] = variant.get("effect", "Not Available")
-            GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
-            GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
-        
         
         #INTERVAR API
         url = "http://wintervar.wglab.org/api_new.php"
@@ -175,14 +174,11 @@ if user_input:
         if response.status_code == 200:
             try:
                 results = response.json()
+                # Assuming the results contain ACMG classification and other details
+                InterVar_results[0] = results.get("Intervar", "Not Available")
+                InterVar_results[2] = results.get("Gene", "Not Available")
             except JSONDecodeError as E:
                 pass
-
-        
-        
-            # Assuming the results contain ACMG classification and other details
-            InterVar_results[0] = results.get("Intervar", "Not Available")
-            InterVar_results[2] = results.get("Gene", "Not Available")
         
         # Display results in a table
         st.write("### ACMG Results")
