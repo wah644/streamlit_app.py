@@ -140,13 +140,15 @@ if user_input:
             }
     
             # Make API request
-        try:
-            response = requests.get(url, headers=headers, params=params)
-        except JSONDecodeError as E:
-            pass
+        
+        response = requests.get(url, headers=headers, params=params)
+        
         
         if response.status_code == 200:
-            data = response.json()
+            try:
+                data = response.json()
+            except JSONDecodeError as E:
+                pass
                     
             variant = data["variants"][0]  # Get the first variant
             GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
@@ -166,13 +168,15 @@ if user_input:
                 "build": parts[4]
             }
 
-        try:
-            response = requests.get(url, params=params)
-        except JSONDecodeError as E:
-            pass
+        
+        response = requests.get(url, params=params)
             
         if response.status_code == 200:
-            results = response.json()  # Assuming the response is JSON
+            try:
+                results = response.json()
+            except JSONDecodeError as E:
+                pass
+
         
         
             # Assuming the results contain ACMG classification and other details
