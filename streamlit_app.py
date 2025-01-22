@@ -143,7 +143,7 @@ if user_input:
                 gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
 
                 # Display results in a table
-                st.write("### Variant Analysis Results")
+                st.write("### ACMG Results")
                 data = {
                         "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                 "GeneBe Results": [acmg_classification, effect, gene_symbol, gene_hgnc_id],
