@@ -4,6 +4,7 @@ from groq import Groq
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
+flag = false
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
@@ -95,10 +96,11 @@ def get_variant_info(message):
     try:
         parts = message.split(',')
         if len(parts) == 5 and parts[1].isdigit():
-            st.write("Message matches the expected format!")
+            flag = true
             return parts
         else:
-            st.write("Message does not match the format.")
+            st.write("Message does not match a variant format, please try again by entering a genetic variant.")
+            flag = false
             return []
     except Exception as e:
         st.write(f"Error while parsing variant: {e}")
@@ -107,7 +109,7 @@ def get_variant_info(message):
 # Main Streamlit interaction loop
 user_input = st.text_input("Enter a genetic variant or a question:")
 
-if user_input:
+if user_input and flag = true:
     # Get assistant's response
     assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
@@ -115,12 +117,10 @@ if user_input:
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
 
-    if parts:
-
-        #GENEBE API
-        # Define the API URL and parameters
-        url = "https://api.genebe.net/cloud/api-public/v1/variant"
-        params = {
+    #GENEBE API
+    # Define the API URL and parameters
+    url = "https://api.genebe.net/cloud/api-public/v1/variant"
+    params = {
             "chr": parts[0],
             "pos": parts[1],
             "ref": parts[2],
@@ -128,26 +128,25 @@ if user_input:
             "genome": parts[4]
         }
 
-        # Set the headers
-        headers = {
+    # Set the headers
+    headers = {
             "Accept": "application/json"
         }
 
         # Make API request
-        response = requests.get(url, headers=headers, params=params)
-        data = response.json()
+    response = requests.get(url, headers=headers, params=params)
+    data = response.json()
             
-        variant = data["variants"][0]  # Get the first variant
-        GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
-        GeneBe_results[1] = variant.get("effect", "Not Available")
-        GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
-        GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
+    variant = data["variants"][0]  # Get the first variant
+    GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+    GeneBe_results[1] = variant.get("effect", "Not Available")
+    GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+    GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
 
 
-
-        #INTERVAR API
-        url = "http://wintervar.wglab.org/api_new.php"
-        params = {
+    #INTERVAR API
+    url = "http://wintervar.wglab.org/api_new.php"
+    params = {
             "queryType": "position",
             "chr": parts[0],
             "pos": parts[1],
@@ -156,26 +155,25 @@ if user_input:
             "build": parts[4]
         }
 
-        response = requests.get(url, params=params)
-        results = response.json()  # Assuming the response is JSON
+    response = requests.get(url, params=params)
+    results = response.json()  # Assuming the response is JSON
 
 
-        # Assuming the results contain ACMG classification and other details
-        InterVar_results[0] = results.get("Intervar", "Not Available")
-        InterVar_results[2] = results.get("Gene", "Not Available")
+    # Assuming the results contain ACMG classification and other details
+    InterVar_results[0] = results.get("Intervar", "Not Available")
+    InterVar_results[2] = results.get("Gene", "Not Available")
 
-        # Display results in a table
-        st.write("### ACMG Results")
-        data = {
+    # Display results in a table
+    st.write("### ACMG Results")
+    data = {
                  "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                 "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
                 "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                 }
-        st.table(data)
+    st.table(data)
 
 
-    else:
-        st.write("Unable to parse the variant information. Please check your input.")
+    
 
     # Non-variant input, handle as general question
     user_input = f"Tell me about the possible mendelian diseases linked to the following genetic variant: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]}"
