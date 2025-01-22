@@ -1,11 +1,10 @@
-
 import streamlit as st
 import requests
 from groq import Groq
 
 
 # App title and description
-st.set_page_config(page_title="DxVar: Genomic Analysis Assistant")
+st.set_page_config(page_title="DxVar")
 st.title("DxVar")
 
 # Hide Streamlit branding
