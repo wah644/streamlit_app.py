@@ -183,7 +183,7 @@ if user_input:
         st.write("### ClinGen Gene-Disease Results")
         # Load the CSV file
 
-        file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv'
+        file_url = 'https://raw.githubusercontent.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv'
         st.write(1)
         df = pd.read_csv(file_url)
         st.write(2)
