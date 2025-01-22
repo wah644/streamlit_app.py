@@ -184,12 +184,9 @@ if user_input:
         # Load the CSV file
 
         file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
-        st.write(1)
+
         df = pd.read_csv(file_url)
-        st.write(2)
 
-
-        st.write(df.iloc[3])
         
           # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
