@@ -6,21 +6,6 @@ parts = []
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
 
-# Display results with justified text using HTML
-st.markdown("""
-    <style>
-        .justified-text {
-            text-align: justify;
-        }
-        .results-table {
-            margin-left: auto;
-            margin-right: auto;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-
-
 st.title("DxVar")
 
 # Initialize Groq API client
@@ -162,5 +147,13 @@ if user_input:
     # Non-variant input, handle as general question
     user_input = f"Tell me about the following genetic variant and its possible mendelian diseases: ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
     assistant_response = get_assistant_response(user_input)
-    st.write(f"Assistant: {assistant_response}")
+    st.markdown(
+    f"""
+    <div class="justified-text">
+        Assistant: {assistant_response}
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 
