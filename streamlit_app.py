@@ -199,7 +199,7 @@ if user_input:
                 return "No existing gene-disease match found"
         
         # Find and display the matching rows
-        matching_result = find_gene_match(GeneBe_results[2], 'HGNC:'+GeneBe_results[3])
+        matching_result = find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         st.write(matching_result)
 
 
