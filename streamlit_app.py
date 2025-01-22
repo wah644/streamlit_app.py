@@ -59,7 +59,7 @@ def get_assistant_response_initial(user_input):
 # Function to interact with Groq API for assistant responses
 def get_assistant_response(user_input):
     groq_messages = [{"role": "user", "content": user_input}]
-    for message in initial_messages:
+    for message in messages:
         groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
 
     completion = client.chat.completions.create(
