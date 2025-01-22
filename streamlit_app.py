@@ -11,7 +11,7 @@ st.title("DxVar")
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 # Define the initial system message
-messages = [
+initial_messages = [
     {
         "role": "system",
         "content": (
@@ -28,10 +28,38 @@ messages = [
     }
 ]
 
+messages = [
+    {
+        "role": "system",
+        "content": (
+            "You are a clinician assistant chatbot specializing in genomic research and variant analysis. "
+            "Your task is to interpret user-provided genetic variant data, identify possible Mendelian diseases linked to genes."
+        ),
+    }
+]
+
+# Function to interact with Groq API for assistant responses
+def get_assistant_response_initial(user_input):
+    groq_messages = [{"role": "user", "content": user_input}]
+    for message in initial_messages:
+        groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
+
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=groq_messages,
+        temperature=1,
+        max_completion_tokens=1024,
+        top_p=1,
+        stream=False,
+        stop=None,
+    )
+
+    return completion.choices[0].message.content
+
 # Function to interact with Groq API for assistant responses
 def get_assistant_response(user_input):
     groq_messages = [{"role": "user", "content": user_input}]
-    for message in messages:
+    for message in initial_messages:
         groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
 
     completion = client.chat.completions.create(
@@ -65,7 +93,7 @@ user_input = st.text_input("Enter a genetic variant or a question:")
 
 if user_input:
     # Get assistant's response
-    assistant_response = get_assistant_response(user_input)
+    assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
     
     # Parse the variant if present
