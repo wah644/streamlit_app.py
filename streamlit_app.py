@@ -119,4 +119,4 @@ try:
     assistant_response = get_assistant_response(user_input)
     st.write(f"Assistant: {assistant_response}")
 except NameError as e:
-    
+    pass
