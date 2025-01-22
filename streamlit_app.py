@@ -97,9 +97,7 @@ def get_variant_info(message):
     try:
         parts = message.split(',')
         if len(parts) == 5 and parts[1].isdigit():
-            st.write('setting flag to true')
             flag = True
-            st.write(flag)
             return parts
         else:
             st.write("Message does not match a variant format, please try again by entering a genetic variant.")
@@ -122,7 +120,6 @@ if user_input:
     st.write(flag)
     
     if flag == True:
-        st.write('made it here flag to true')
         #GENEBE API
         # Define the API URL and parameters
         url = "https://api.genebe.net/cloud/api-public/v1/variant"
