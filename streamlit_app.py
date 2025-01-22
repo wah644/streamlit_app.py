@@ -89,7 +89,10 @@ params = {
     "genome": genome
 }
 
-
+# Set the headers
+headers = {
+    "Accept": "application/json"
+}
 
 
 
