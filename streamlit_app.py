@@ -109,7 +109,7 @@ def get_variant_info(message):
 # Main Streamlit interaction loop
 user_input = st.text_input("Enter a genetic variant or a question:")
 
-if user_input and flag = true:
+if user_input and flag == true:
     # Get assistant's response
     assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
