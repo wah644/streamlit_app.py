@@ -116,6 +116,8 @@ if user_input:
     parts = get_variant_info(assistant_response)
 
     if parts:
+
+        #GENEBE API
         # Define the API URL and parameters
         url = "https://api.genebe.net/cloud/api-public/v1/variant"
         params = {
@@ -133,27 +135,45 @@ if user_input:
 
         # Make API request
         response = requests.get(url, headers=headers, params=params)
-
-        if response.status_code == 200:
-            data = response.json()
+        data = response.json()
             
-            variant = data["variants"][0]  # Get the first variant
-            GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
-            GeneBe_results[1] = variant.get("effect", "Not Available")
-            GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
-            GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
+        variant = data["variants"][0]  # Get the first variant
+        GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+        GeneBe_results[1] = variant.get("effect", "Not Available")
+        GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+        GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
 
-            # Display results in a table
-            st.write("### ACMG Results")
-            data = {
-                       "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
+
+
+        #INTERVAR API
+        url = "http://wintervar.wglab.org/api_new.php"
+        params = {
+            "queryType": "position",
+            "chr": parts[0],
+            "pos": parts[1],
+            "ref": parts[2],
+            "alt": parts[3],
+            "build": parts[4]
+        }
+
+        response = requests.get(url, params=params)
+        results = response.json()  # Assuming the response is JSON
+
+
+        # Assuming the results contain ACMG classification and other details
+        acmg_classification = results.get("Intervar", "Not Available")
+        gene_symbol = results.get("Gene", "Not Available")
+
+        # Display results in a table
+        st.write("### ACMG Results")
+        data = {
+                 "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                 "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
                 "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                 }
-            st.table(data)
+        st.table(data)
 
-        else:
-            st.write("API Error:", response.status_code, response.text)
+
     else:
         st.write("Unable to parse the variant information. Please check your input.")
 
