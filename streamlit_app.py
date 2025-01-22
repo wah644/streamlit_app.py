@@ -94,7 +94,7 @@ def get_assistant_response(user_input):
 def get_variant_info(message):
     try:
         parts = message.split(',')
-        if len(parts) == 5 and parts[1].isdigit() and parts[4] == "hg38":
+        if len(parts) == 5 and parts[1].isdigit():
             st.write("Message matches the expected format!")
             return parts
         else:
