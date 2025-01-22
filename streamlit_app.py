@@ -11,15 +11,11 @@ st.title("DxVar")
 # Initialize Groq API client
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-# Define the initial system message and the user's first message
+# Define the initial system message
 messages = [
     {
         "role": "system",
-        "content": (
-            "You are a clinician assistant chatbot specializing in genomic research and variant analysis. "
-            "Your task is to interpret user-provided genetic variant data, identify possible Mendelian diseases, and provide concise responses."
-        ),
-    },
+        "content": "You are a clinician assistant chatbot specializing in genomic research and variant analysis. Your task is to interpret user-provided genetic variant data, identify possible Mendelian diseases linked to genes, and provide concise responses. if the user enters variants you are to respond in a csv format as such: chromosome,position,ref base,alt base,and if no genome is provided, assume hg38. ex: user input: chr6:160585140-T>G then you respond: 6,160585140,T,G,hg38. This response should be standalone with no extra texts. Remember bases can be two letters ex: chr6:160585140-T>GG.  If the user has additional requests with the message including the variant like: 'tell me about diseases linked with the variant: chr6:160585140-T>G' then reply asking them to enter only the variant, you need only the variant at first. They can ask follow up questions afterwards. The user can enter the variant in any format, but it should be the variant alone with no follow up questions. You can be asked about any other question, pleases answer it but if they mention the variant info as stated above then ask them to only enter the variant"
 ]
 
 # Function to interact with Groq API for assistant responses
