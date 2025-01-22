@@ -117,6 +117,7 @@ if user_input:
     
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
+    st.write(parts)
 
     if flag == True:
         st.write('made it here flag to true')
