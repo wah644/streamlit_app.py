@@ -108,7 +108,7 @@ def get_variant_info(message):
         return []
 
 # Main Streamlit interaction loop
-user_input = st.text_input("Enter a genetic variant or a question:")
+user_input = st.text_input("Enter a genetic variant:")
 
 if user_input:
     # Get assistant's response
@@ -119,6 +119,8 @@ if user_input:
     parts = get_variant_info(assistant_response)
     
     if flag == True:
+
+        #ACMG
         #GENEBE API
         # Define the API URL and parameters
         url = "https://api.genebe.net/cloud/api-public/v1/variant"
@@ -175,9 +177,14 @@ if user_input:
         st.table(data)
     
     
+        #GENE-DISEASE DATABASE
         
-    
-        # Non-variant input, handle as general question
+
+
+
+
+        
+        # AI Tells me more
         user_input = f"Tell me about the possible mendelian diseases linked to the following genetic variant: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]}"
         assistant_response = get_assistant_response(user_input)
         st.markdown(
