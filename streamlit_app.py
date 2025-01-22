@@ -96,6 +96,7 @@ def get_variant_info(message):
     try:
         parts = message.split(',')
         if len(parts) == 5 and parts[1].isdigit():
+            st.write('setting flag to true')
             flag = True
             return parts
         else:
@@ -118,6 +119,7 @@ if user_input:
     parts = get_variant_info(assistant_response)
 
     if flag == True:
+        st.write('made it here flag to true')
         #GENEBE API
         # Define the API URL and parameters
         url = "https://api.genebe.net/cloud/api-public/v1/variant"
