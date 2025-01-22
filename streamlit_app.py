@@ -184,6 +184,8 @@ if user_input:
         # Load the CSV file
         file_path = 'Clingen-Gene-Disease-Summary-2025-01-03.csv'
         df = pd.read_csv(file_path)
+
+        st.write(df.head)
         
         # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
