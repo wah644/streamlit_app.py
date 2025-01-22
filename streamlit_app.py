@@ -189,7 +189,7 @@ if user_input:
         st.write(2)
 
 
-        st.write(df[3])
+        st.write(df.iloc[3])
         
           # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
