@@ -1,3 +1,4 @@
+from json.decoder import JSONDecodeError  # Import JSONDecodeError from json.decoder
 import streamlit as st
 import requests
 from groq import Groq
