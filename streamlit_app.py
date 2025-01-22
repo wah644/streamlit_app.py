@@ -16,35 +16,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-    <div class="justified-text">
-        <h3>Variant Analysis Results</h3>
-        <table class="results-table" style="width: 100%; border-collapse: collapse; border: 1px solid black;">
-            <tr>
-                <th style="border: 1px solid black; padding: 8px; text-align: left;">Attribute</th>
-                <th style="border: 1px solid black; padding: 8px; text-align: left;">Value</th>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">ACMG Classification</td>
-                <td style="border: 1px solid black; padding: 8px;">{}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Effect</td>
-                <td style="border: 1px solid black; padding: 8px;">{}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Gene Symbol</td>
-                <td style="border: 1px solid black; padding: 8px;">{}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Gene HGNC ID</td>
-                <td style="border: 1px solid black; padding: 8px;">{}</td>
-            </tr>
-        </table>
-    </div>
-""".format(acmg_classification, effect, gene_symbol, gene_hgnc_id), unsafe_allow_html=True)
-
-
 # App title and description
 st.set_page_config(page_title="DxVar", layout="centered")
 st.title("DxVar")
