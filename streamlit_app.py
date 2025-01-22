@@ -106,6 +106,14 @@ if user_input:
                 st.write("Effect:", effect)
                 st.write("Gene Symbol:", gene_symbol)
                 st.write("Gene HGNC ID:", gene_hgnc_id)
+                # Display results in a table
+                st.write("### Variant Analysis Results")
+                data = {
+                        "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
+                "Value": [acmg_classification, effect, gene_symbol, gene_hgnc_id],
+                }
+                st.table(data)
+
             else:
                 st.write("No variants found in the API response.")
         else:
