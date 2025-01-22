@@ -158,7 +158,7 @@ if user_input:
         st.write("Unable to parse the variant information. Please check your input.")
 
     # Non-variant input, handle as general question
-    user_input = f"Tell me about the following genetic variant and its possible mendelian diseases: ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
+    user_input = f"Tell me about the possible mendelian diseases linked to the following genetic variant: ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
     assistant_response = get_assistant_response(user_input)
     st.markdown(
     f"""
