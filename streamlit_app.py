@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from groq import Groq
-
+parts = []
 
 # App title and description
 st.set_page_config(page_title="DxVar", layout="centered")
