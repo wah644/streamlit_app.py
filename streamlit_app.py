@@ -161,8 +161,8 @@ if user_input:
 
 
         # Assuming the results contain ACMG classification and other details
-        acmg_classification = results.get("Intervar", "Not Available")
-        gene_symbol = results.get("Gene", "Not Available")
+        InterVar_results[0] = results.get("Intervar", "Not Available")
+        InterVar_results[2] = results.get("Gene", "Not Available")
 
         # Display results in a table
         st.write("### ACMG Results")
