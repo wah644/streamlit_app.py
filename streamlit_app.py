@@ -7,18 +7,6 @@ from groq import Groq
 st.set_page_config(page_title="DxVar")
 st.title("DxVar")
 
-# Hide Streamlit branding
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-
-
-
 
 # Initialize Groq API client
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
