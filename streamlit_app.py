@@ -4,7 +4,7 @@ from groq import Groq
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
-flag = false
+flag = False
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
@@ -96,11 +96,11 @@ def get_variant_info(message):
     try:
         parts = message.split(',')
         if len(parts) == 5 and parts[1].isdigit():
-            flag = true
+            flag = True
             return parts
         else:
             st.write("Message does not match a variant format, please try again by entering a genetic variant.")
-            flag = false
+            flag = False
             return []
     except Exception as e:
         st.write(f"Error while parsing variant: {e}")
@@ -109,7 +109,7 @@ def get_variant_info(message):
 # Main Streamlit interaction loop
 user_input = st.text_input("Enter a genetic variant or a question:")
 
-if user_input and flag == true:
+if user_input and flag == True:
     # Get assistant's response
     assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
