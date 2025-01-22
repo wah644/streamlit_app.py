@@ -189,22 +189,7 @@ if user_input:
 
         st.write(df.head)
         
-        # Function to find matching gene symbol and HGNC ID
-        def find_gene_match(gene_symbol, hgnc_id):
-            # Check if the gene symbol and HGNC ID columns exist in the data
-            if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
-                # Filter rows matching the gene symbol and HGNC ID
-                matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
-                if not matching_rows.empty:
-                    return matching_rows
-                else:
-                    return "No match found."
-            else:
-                return "No existing gene-disease match found"
-        
-        # Find and display the matching rows
-        matching_result = find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
-        st.write(matching_result)
+      
 
 
 
