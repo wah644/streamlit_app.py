@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from groq import Groq
 parts = []
+GeneBe_results = ['-','-','-','-']
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
@@ -137,16 +138,16 @@ if user_input:
             
             if "variants" in data and len(data["variants"]) > 0:
                 variant = data["variants"][0]  # Get the first variant
-                acmg_classification = variant.get("acmg_classification", "Not Available")
-                effect = variant.get("effect", "Not Available")
-                gene_symbol = variant.get("gene_symbol", "Not Available")
-                gene_hgnc_id = variant.get("gene_hgnc_id", "Not Available")
+                GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+                GeneBe_results[1] = variant.get("effect", "Not Available")
+                GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+                GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
 
                 # Display results in a table
                 st.write("### ACMG Results")
                 data = {
                         "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
-                "GeneBe Results": [acmg_classification, effect, gene_symbol, gene_hgnc_id],
+                "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
                 }
                 st.table(data)
 
