@@ -47,26 +47,11 @@ def get_assistant_response(user_input):
 
 # Function to parse variant information
 def parse_variant(message):
-    """
-    Parse the variant message to extract chromosome, position, ref, alt, and genome.
-    Returns a dictionary with parsed information if valid, or None otherwise.
-    """
-    if ">" in message and ":" in message:
-        try:
-            chr_pos, ref_alt = message.split(":")
-            ref, alt = ref_alt.split(">")
-            chromosome = chr_pos.replace("chr", "")
-            position = chr_pos.split("-")[0]
-            return {
-                "chr": chromosome,
-                "pos": position,
-                "ref": ref,
-                "alt": alt,
-                "genome": "hg38"
-            }
-        except ValueError:
-            return None
-    return None
+    parts = message.split(',')
+    if len(parts) == 5 and parts[1].isdigit() and parts[4] == "hg38":
+        print("Message matches the expected format!")
+    else:
+        print("Message does not match the format.")
 
 # Main Streamlit interaction loop
 conversation_history = ""
