@@ -140,8 +140,11 @@ if user_input:
             }
     
             # Make API request
-        response = requests.get(url, headers=headers, params=params)
-        st.write(response.text) 
+        try:
+            response = requests.get(url, headers=headers, params=params)
+        except JSONDecodeError as E:
+            pass
+        
         if response.status_code == 200:
             data = response.json()
                     
@@ -162,9 +165,12 @@ if user_input:
                 "alt": parts[3],
                 "build": parts[4]
             }
-    
-        response = requests.get(url, params=params)
-        st.write(response.text) 
+
+        try:
+            response = requests.get(url, params=params)
+        except JSONDecodeError as E:
+            pass
+            
         if response.status_code == 200:
             results = response.json()  # Assuming the response is JSON
         
