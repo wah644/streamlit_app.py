@@ -53,12 +53,6 @@ def get_assistant_response(user_input):
 
     return completion.choices[0].message.content
 
-# Display chat history
-for message in st.session_state["messages"]:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
-
-
 
 
 # Initialize the conversation history
