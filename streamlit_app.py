@@ -182,8 +182,10 @@ if user_input:
         #GENE-DISEASE DATABASE
         st.write("### ClinGen Gene-Disease Results")
         # Load the CSV file
-        file_path = 'Clingen-Gene-Disease-Summary-2025-01-03.csv'
-        df = pd.read_csv(file_path)
+
+        #file_url = 'https://raw.githubusercontent.com/username/repository/branch/path/to/Clingen-Gene-Disease-Summary-2025-01-03.csv'
+        df = pd.read_csv(file_url)
+
 
         st.write(df.head)
         
