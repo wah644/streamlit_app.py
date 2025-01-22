@@ -141,15 +141,16 @@ if user_input:
     
             # Make API request
         response = requests.get(url, headers=headers, params=params)
-        data = response.json()
-                
-        variant = data["variants"][0]  # Get the first variant
-        GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
-        GeneBe_results[1] = variant.get("effect", "Not Available")
-        GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
-        GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
-    
-    
+        if response.status_code == 200:
+            data = response.json()
+                    
+            variant = data["variants"][0]  # Get the first variant
+            GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+            GeneBe_results[1] = variant.get("effect", "Not Available")
+            GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+            GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
+        
+        
         #INTERVAR API
         url = "http://wintervar.wglab.org/api_new.php"
         params = {
@@ -162,13 +163,14 @@ if user_input:
             }
     
         response = requests.get(url, params=params)
-        results = response.json()  # Assuming the response is JSON
-    
-    
-        # Assuming the results contain ACMG classification and other details
-        InterVar_results[0] = results.get("Intervar", "Not Available")
-        InterVar_results[2] = results.get("Gene", "Not Available")
-    
+        if response.status_code == 200:
+            results = response.json()  # Assuming the response is JSON
+        
+        
+            # Assuming the results contain ACMG classification and other details
+            InterVar_results[0] = results.get("Intervar", "Not Available")
+            InterVar_results[2] = results.get("Gene", "Not Available")
+        
         # Display results in a table
         st.write("### ACMG Results")
         data = {
