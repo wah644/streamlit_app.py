@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 from groq import Groq
+import pandas as pd
+
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
@@ -178,12 +180,31 @@ if user_input:
     
     
         #GENE-DISEASE DATABASE
+        st.write("### ClinGen Gene-Disease Results")
+        # Load the CSV file
+        file_path = 'Clingen-Gene-Disease-Summary-2025-01-03.csv'
+        df = pd.read_csv(file_path)
         
-
-
-
-
+        # Function to find matching gene symbol and HGNC ID
+        def find_gene_match(gene_symbol, hgnc_id):
+            # Check if the gene symbol and HGNC ID columns exist in the data
+            if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
+                # Filter rows matching the gene symbol and HGNC ID
+                matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
+                if not matching_rows.empty:
+                    return matching_rows
+                else:
+                    return "No match found."
+            else:
+                return "No existing gene-disease match found"
         
+        # Find and display the matching rows
+        matching_result = find_gene_match(GeneBe_results[2], GeneBe_results[3])
+        st.write(matching_result)
+
+
+
+
         # AI Tells me more
         user_input = f"Tell me about the possible mendelian diseases linked to the following genetic variant: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]}"
         assistant_response = get_assistant_response(user_input)
