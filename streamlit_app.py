@@ -3,6 +3,7 @@ import requests
 from groq import Groq
 parts = []
 GeneBe_results = ['-','-','-','-']
+InterVar_results = ['-','-','-','-']
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
@@ -136,23 +137,21 @@ if user_input:
         if response.status_code == 200:
             data = response.json()
             
-            if "variants" in data and len(data["variants"]) > 0:
-                variant = data["variants"][0]  # Get the first variant
-                GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
-                GeneBe_results[1] = variant.get("effect", "Not Available")
-                GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
-                GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
+            variant = data["variants"][0]  # Get the first variant
+            GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+            GeneBe_results[1] = variant.get("effect", "Not Available")
+            GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+            GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
 
-                # Display results in a table
-                st.write("### ACMG Results")
-                data = {
-                        "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
+            # Display results in a table
+            st.write("### ACMG Results")
+            data = {
+                       "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                 "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
+                "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                 }
-                st.table(data)
+            st.table(data)
 
-            else:
-                st.write("No variants found in the API response.")
         else:
             st.write("API Error:", response.status_code, response.text)
     else:
