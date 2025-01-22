@@ -93,6 +93,7 @@ def get_assistant_response(user_input):
 
 # Function to parse variant information
 def get_variant_info(message):
+    global flag
     try:
         parts = message.split(',')
         if len(parts) == 5 and parts[1].isdigit():
