@@ -100,7 +100,7 @@ def get_variant_info(message):
             flag = True
             return parts
         else:
-            st.write("Message does not match a variant format, please try again by entering a genetic variant.")
+            #st.write("Message does not match a variant format, please try again by entering a genetic variant.")
             flag = False
             return []
     except Exception as e:
