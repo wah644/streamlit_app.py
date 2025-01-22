@@ -4,7 +4,7 @@ from groq import Groq
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
-flag = False
+flag
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
