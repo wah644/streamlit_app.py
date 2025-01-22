@@ -37,34 +37,22 @@ def get_assistant_response(user_input):
 
     return completion.choices[0].message.content
 
-
-
-# Initialize the conversation history
-conversation_history = ""
-for message in messages:
-    role = "System" if message["role"] == "system" else "User"
-    conversation_history += f"{role}: {message['content']}\n"
-
 # Function to get variant information from the user
 def get_variant_info():
-    chr = st.text_input("Enter chromosome", "6")
-    pos = st.text_input("Enter position", "160585140")
-    ref = st.text_input("Enter reference base", "T")
-    alt = st.text_input("Enter alternate base", "G")
-    genome = "hg38"
-    return chr, pos, ref, alt, genome
-
-# Get variant information from the user
-chr, pos, ref, alt, genome = get_variant_info()
+    parts = message.split(',')
+    if len(parts) == 5 and parts[1].isdigit() and parts[4] == "hg38":
+        print("Message matches the expected format!")
+    else:
+        print("Message does not match the format.")
 
 # Define the API URL and parameters
 url = "https://api.genebe.net/cloud/api-public/v1/variant"
 params = {
-    "chr": chr,
-    "pos": pos,
-    "ref": ref,
-    "alt": alt,
-    "genome": genome
+    "chr": parts[0],
+    "pos": parts[1],
+    "ref": parts[2],
+    "alt": parts[3],
+    "genome": parts[4]
 }
 
 # Set the headers
@@ -73,9 +61,12 @@ headers = {
 }
 
 
+assistant_response = get_assistant_response(st.text_input()) 
+get_variant_info(assistant_response)
+
 
 # Make the GET request and display results
-if st.button("Get Variant Info"):
+
     response = requests.get(url, headers=headers, params=params)
 
     # Check the response status and extract relevant data
