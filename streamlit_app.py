@@ -61,7 +61,6 @@ def get_variant_info(message):
         return []
 
 # Main Streamlit interaction loop
-conversation_history = ""
 user_input = st.text_input("Enter a genetic variant or a question:")
 
 if user_input:
@@ -113,3 +112,9 @@ if user_input:
             st.write("API Error:", response.status_code, response.text)
     else:
         st.write("Unable to parse the variant information. Please check your input.")
+
+# Non-variant input, handle as general question
+user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
+assistant_response = get_assistant_response(user_input)
+st.write(f"Assistant: {assistant_response}")
+
