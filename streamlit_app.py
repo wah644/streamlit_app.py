@@ -117,7 +117,7 @@ if user_input:
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
 
-    if parts == True:
+    if flag == True:
         #GENEBE API
         # Define the API URL and parameters
         url = "https://api.genebe.net/cloud/api-public/v1/variant"
