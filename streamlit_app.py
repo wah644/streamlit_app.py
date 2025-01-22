@@ -98,6 +98,7 @@ def get_variant_info(message):
         if len(parts) == 5 and parts[1].isdigit():
             st.write('setting flag to true')
             flag = True
+            st.write(flag)
             return parts
         else:
             st.write("Message does not match a variant format, please try again by entering a genetic variant.")
