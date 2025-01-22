@@ -114,7 +114,7 @@ if user_input:
         st.write("Unable to parse the variant information. Please check your input.")
 
 # Non-variant input, handle as general question
-user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {chr}, Position: {pos}, Reference Base: {ref}, Alternate Base: {alt}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
+user_input = f"Tell me about the following variant and its possible diseases: Chromosome: {parts[0]}, Position: {parts[1]}, Reference Base: {parts[2]}, Alternate Base: {parts[3]}, ACMG Classification: {acmg_classification}, Effect: {effect}, Gene Symbol: {gene_symbol}, Gene HGNC ID: {gene_hgnc_id}"
 assistant_response = get_assistant_response(user_input)
 st.write(f"Assistant: {assistant_response}")
 
