@@ -204,13 +204,12 @@ if user_input:
                 # Function to highlight the rows based on classification
         def highlight_classification(row):
             color_map = {
-        "Definitive": "background-color: rgba(119, 221, 119, 0.65); color: black;",  # Pastel Green with 65% transparency
-        "Disputed": "background-color: rgba(255, 182, 182, 0.65); color: black;",  # Pastel Red with 65% transparency
-        "Moderate": "background-color: rgba(152, 255, 152, 0.65); color: black;",  # Pastel Light Green with 65% transparency
-        "Limited": "background-color: rgba(255, 255, 204, 0.65); color: black;",  # Pastel Yellow with 65% transparency
-        "No Known Disease Relationship": "color: black;",  # No fill, just black text
-        "Strong": "background-color: rgba(102, 204, 102, 0.65); color: black;",  # Pastel Dark Green with 65% transparency
-        "Refuted": "background-color: rgba(255, 182, 182, 0.65); color: black;"  # Pastel Red with 65% transparency
+        "Definitive": "background-color: rgba(119, 221, 119, 0.9); color: black;",  # Pastel Green with 65% transparency
+        "Disputed": "background-color: rgba(255, 182, 182, 0.9); color: black;",  # Pastel Red with 65% transparency
+        "Moderate": "background-color: rgba(152, 255, 152, 0.9); color: black;",  # Pastel Light Green with 65% transparency
+        "Limited": "background-color: rgba(255, 255, 204, 0.9); color: black;",  # Pastel Yellow with 65% transparency
+        "Strong": "background-color: rgba(102, 204, 102, 0.9); color: black;",  # Pastel Dark Green with 65% transparency
+        "Refuted": "background-color: rgba(255, 182, 182, 0.9); color: black;"  # Pastel Red with 65% transparency
     }
             classification = row['CLASSIFICATION']
             return [color_map.get(classification, "")] * len(row)
