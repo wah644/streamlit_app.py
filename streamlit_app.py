@@ -292,13 +292,11 @@ if user_input:
             
             # Display user input in the chat interface
             with st.chat_message("user"):
-                st.write(user_input)
             
             # Generate assistant response inside a spinner
             with st.chat_message("assistant"):
                 with st.spinner("Processing your query..."):
                     assistant_response_2 = get_assistant_response(user_input)
-                    st.write(assistant_response_2)
                     
                     # Append assistant's response to chat history only once
                     st.session_state["messages"].append({"role": "assistant", "content": assistant_response_2})
