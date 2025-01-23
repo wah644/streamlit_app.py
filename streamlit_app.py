@@ -207,7 +207,7 @@ if user_input:
                 "Definitive": "color: rgba(0, 128, 0)",  # Green
                 "Disputed": "color: rgba(255, 0, 0)",  # Red 
                 "Moderate": "color: rgba(144, 238, 144)",  # Light Green 
-                "Limited": "color: rgba(255, 255, 0)",  # Yellow 
+                "Limited": "color: rgba(255, 204, 102)",  # Orange 
                 "No Known Disease Relationship": "",
                 "Strong": "color: rgba(0, 128, 0)",  # Dark Green 
                 "Refuted": "color: rgba(255, 0, 0)"  # Red 
