@@ -50,15 +50,6 @@ initial_messages = [
     }
 ]
 
-messages = [
-    {
-        "role": "system",
-        "content": (
-            "You are a clinician assistant chatbot specializing in genomic research and variant analysis. "
-            "Your task is to interpret user-provided genetic variant data, identify possible Mendelian diseases linked to genes."
-        ),
-    }
-]
 
 # Function to interact with Groq API for assistant responses
 def get_assistant_response_initial(user_input):
