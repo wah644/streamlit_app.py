@@ -268,5 +268,18 @@ if user_input:
         """,
         unsafe_allow_html=True,
     )
+        
+        user_input = st.text_input("Ask me follow up questions, or type exit.")
+        while user_input != 'exit':
+            assistant_response = get_assistant_response(user_input)
+            st.markdown(
+            f"""
+            <div class="justified-text">
+                Assistant: {assistant_response}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+            user_input = st.text_input("Ask me follow up questions, or type exit.")
     
     
