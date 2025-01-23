@@ -7,6 +7,7 @@ import pandas as pd
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
+disease_labels = ['No disease found']
 flag = False
 
 # Set page configuration
@@ -201,6 +202,7 @@ if user_input:
         
           # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
+            global disease_labels
             # Check if the gene symbol and HGNC ID columns exist in the data
             if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
