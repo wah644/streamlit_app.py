@@ -204,13 +204,13 @@ if user_input:
                 # Function to highlight the rows based on classification
         def highlight_classification(row):
             color_map = {
-                "Definitive": "background-color: rgba(0, 128, 0, 0.5)",  # Green with 65% transparency
-                "Disputed": "background-color: rgba(255, 0, 0, 0.2)",  # Red with 65% transparency
-                "Moderate": "background-color: rgba(144, 238, 144, 0.65)",  # Light Green with 65% transparency
-                "Limited": "background-color: rgba(255, 255, 0, 0.65)",  # Yellow with 65% transparency
+                "Definitive": "background-color: rgba(0, 128, 0, 0.05)",  # Green with 65% transparency
+                "Disputed": "background-color: rgba(255, 0, 0, 0.05)",  # Red with 65% transparency
+                "Moderate": "background-color: rgba(144, 238, 144, 0.05)",  # Light Green with 65% transparency
+                "Limited": "background-color: rgba(255, 255, 0, 0.05)",  # Yellow with 65% transparency
                 "No Known Disease Relationship": "",
-                "Strong": "background-color: rgba(0, 128, 0, 0.65)",  # Dark Green with 65% transparency
-                "Refuted": "background-color: rgba(255, 0, 0, 0.2)"  # Red with 65% transparency
+                "Strong": "background-color: rgba(0, 128, 0, 0.05)",  # Dark Green with 65% transparency
+                "Refuted": "background-color: rgba(255, 0, 0, 0.05)"  # Red with 65% transparency
             }
             classification = row['CLASSIFICATION']
             return [color_map.get(classification, "")] * len(row)
