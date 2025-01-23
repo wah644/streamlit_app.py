@@ -285,10 +285,6 @@ if user_input:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
         
-        for message in st.session_state["messages"]:
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
-        
         
         if chat_message := st.chat_input("Enter genetic variant information (e.g., chr1:12345(A>T)):"):
             st.session_state["messages"].append({"role": "user", "content": chat_message})
