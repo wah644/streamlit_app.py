@@ -201,23 +201,37 @@ if user_input:
         df = pd.read_csv(file_url)
 
         
-          # Function to find matching gene symbol and HGNC ID
+                # Function to highlight the rows based on classification
+        def highlight_classification(row):
+            color_map = {
+                "Definitive": "background-color: green",
+                "Disputed": "background-color: red",
+                "Moderate": "background-color: lightgreen",
+                "Limited": "background-color: yellow",
+                "No Known Disease Relationship": "",
+                "Strong": "background-color: darkgreen",
+                "Refuted": "background-color: red"
+            }
+            classification = row['CLASSIFICATION']
+            return [color_map.get(classification, "")] * len(row)
+        
+        # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
             global disease_labels
             global disease_classification_dict
+            
             # Check if the gene symbol and HGNC ID columns exist in the data
             if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
                 matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 if not matching_rows.empty:
-                    st.write(matching_rows)
-                    #disease_labels = matching_rows['DISEASE LABEL'].tolist()
+                    st.write(matching_rows.style.apply(highlight_classification, axis=1))
                     disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
                     st.write(disease_classification_dict)
                 else:
                     #st.write("No match found.")
                     st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
-
+        
             else:
                 st.write("No existing gene-disease match found")
         
