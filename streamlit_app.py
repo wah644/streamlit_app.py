@@ -277,11 +277,9 @@ if user_input:
     )
         
         #FINAL CHATBOT
-        user_in = st.text_input("Ask me follow up questions, or type exit.")
-        if user_in:
-            while user_in != 'exit' and user_in != "":
-                assistant_response_2 = get_assistant_response(user_in)
-                st.markdown(
+        user_in = st.text_input("Ask me follow up questions!")
+        assistant_response_2 = get_assistant_response(user_in)
+        st.markdown(
                 f"""
                 <div class="justified-text">
                     Assistant: {assistant_response_2}
@@ -289,5 +287,4 @@ if user_input:
                 """,
                 unsafe_allow_html=True,
             )
-                user_in = ""
-                user_in = st.text_input("Ask me follow up questions, or type exit.")
+
