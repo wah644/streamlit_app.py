@@ -215,13 +215,12 @@ if user_input:
         # Find and display the matching rows
         matching_result = find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         st.write(matching_result)
-      
-
-
+        
+        disease_labels = matching_result['DISEASE LABEL'].tolist()
 
 
         # AI Tells me more
-        user_input = f"Tell me about the possible mendelian diseases linked to the following genetic variant: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]}"
+        user_input = f"Tell me about the diseases: {disease_labels}. These were found to be linked to the following genetic variant: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]}"
         assistant_response = get_assistant_response(user_input)
         st.markdown(
         f"""
