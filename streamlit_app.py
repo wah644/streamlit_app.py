@@ -201,7 +201,7 @@ if user_input:
         df = pd.read_csv(file_url)
 
             
-        def highlight_row_number(row):
+        def highlight_classification(row):
             color_map = {
                 "Definitive": "background-color: rgba(119, 221, 119, 0.65); color: black;",  # Pastel Green
                 "Disputed": "background-color: rgba(255, 182, 182, 0.65); color: black;",  # Pastel Red
