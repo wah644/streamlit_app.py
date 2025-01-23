@@ -200,20 +200,21 @@ if user_input:
 
         df = pd.read_csv(file_url)
 
-        
-                # Function to highlight the rows based on classification
-        def highlight_classification(row):
+            
+        def highlight_row_number(row):
             color_map = {
-        "Definitive": "background-color: rgba(119, 221, 119, 0.9); color: black;",  # Pastel Green with 65% transparency
-        "Disputed": "background-color: rgba(255, 182, 182, 0.9); color: black;",  # Pastel Red with 65% transparency
-        "Moderate": "background-color: rgba(152, 255, 152, 0.9); color: black;",  # Pastel Light Green with 65% transparency
-        "Limited": "background-color: rgba(255, 255, 204, 0.9); color: black;",  # Pastel Yellow with 65% transparency
-        "Strong": "background-color: rgba(102, 204, 102, 0.9); color: black;",  # Pastel Dark Green with 65% transparency
-        "Refuted": "background-color: rgba(255, 182, 182, 0.9); color: black;"  # Pastel Red with 65% transparency
-    }
+                "Definitive": "background-color: rgba(119, 221, 119, 0.65); color: black;",  # Pastel Green
+                "Disputed": "background-color: rgba(255, 182, 182, 0.65); color: black;",  # Pastel Red
+                "Moderate": "background-color: rgba(152, 255, 152, 0.65); color: black;",  # Pastel Light Green
+                "Limited": "background-color: rgba(255, 255, 204, 0.65); color: black;",  # Pastel Yellow
+                "No Known Disease Relationship": "color: black;",  # No fill
+                "Strong": "background-color: rgba(102, 204, 102, 0.65); color: black;",  # Pastel Dark Green
+                "Refuted": "background-color: rgba(255, 182, 182, 0.65); color: black;"  # Pastel Red
+            }
             classification = row['CLASSIFICATION']
-            return [color_map.get(classification, "")] * len(row)
-        
+            index_style = color_map.get(classification, "")  # Get style for index
+            return [index_style] + [''] * (len(row) - 1)  # Only apply the style to the index
+
         # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
             global disease_labels
