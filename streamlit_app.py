@@ -225,7 +225,7 @@ if user_input:
         find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
-        user_input = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Tell me about these diseases, announce if a disease has been refuted, no need to explain that disease. Furthermore, list the disease in order of their classification (ex: definitive first then limited). "
+        user_input = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. "
         assistant_response = get_assistant_response(user_input)
         st.markdown(
         f"""
