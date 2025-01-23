@@ -193,23 +193,21 @@ if user_input:
 
 
         #SLIDER
-        pathogenicity_value = 'Uncertain significance'
+                # Variable to specify the value (you can set this dynamically or as needed)
+        pathogenicity_value = 'Likely pathogenic (LP)'
+        
         # Define the options for the scale
-        options = ['Pathogenic', 'Likely pathogenic', 'Uncertain significance', 'Likely benign', 'Benign']
+        options = ['Pathogenic (P)', 'Likely pathogenic (LP)', 'Uncertain significance (VUS)', 'Likely benign (LB)', 'Benign (B)']
         
-        # Find the index of the predefined value in the options list
-        value_index = options.index(pathogenicity_value)
-        
-        # Create a slider with the selected value
-        st.slider(
+        # Create a select_slider with the string labels
+        classification = st.select_slider(
             'Pathogenicity classification',
-            min_value=0,
-            max_value=4,
-            value=value_index,  # Set the initial value to the index of the predefined value
-            step=1,
-            format="%.0f",
-            disabled=True  # Make the slider unchangeable
+            options=options,
+            value=pathogenicity_value  # Set the initial value to the predefined value
         )
+        
+        # Display the selected classification
+        st.write('Classification:', classification)
     
     
         #GENE-DISEASE DATABASE
