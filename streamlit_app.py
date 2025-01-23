@@ -269,19 +269,38 @@ if user_input:
         unsafe_allow_html=True,
     )
         
-        user_in = st.text_input("Ask me follow up questions, or type exit.")
+        #FINAL CHATBOT
+        # Initialize session state variables if they are not already set
+        if "user_in" not in st.session_state:
+            st.session_state.user_in = ""  # Store user input
+        if "exit_conversation" not in st.session_state:
+            st.session_state.exit_conversation = False  # Flag to control the exit condition
+        
+        # Display the input text box with a unique key to avoid duplicate IDs
+        user_in = st.text_input("Ask me follow up questions, or type exit.", key="user_input_1", value=st.session_state.user_in)
+        
+        # Check if user provided input
         if user_in:
-            while user_in != 'exit' and user_in != "":
+            if user_in.lower() == "exit":  # Check for exit condition
+                st.session_state.exit_conversation = True
+            else:
+                # Get assistant's response and display it
                 assistant_response = get_assistant_response(user_in)
                 st.markdown(
-                f"""
-                <div class="justified-text">
-                    Assistant: {assistant_response}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-                user_in = ""
-                user_in = st.text_input("Ask me follow up questions, or type exit.")
+                    f"""
+                    <div class="justified-text">
+                        Assistant: {assistant_response}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                # Store the user input in session state for use in the next input box
+                st.session_state.user_in = user_in
         
-    
+        # Allow the loop to continue unless the user types 'exit'
+        if not st.session_state.exit_conversation:
+            # Let the user ask another follow-up question
+            st.text_input("Ask me follow up questions, or type exit.", key="user_input_2", value="")
+        else:
+            # When exit is typed, stop the conversation
+            st.write("Conversation ended. Type 'exit' to end the interaction.")
