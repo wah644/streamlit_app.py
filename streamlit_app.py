@@ -97,9 +97,8 @@ def get_assistant_response(user_input):
         stop=None,
     )
 
-    assistant_reply = completion.choices[0].message.content
 
-    return assistant_reply
+    return completion
 
 
 
