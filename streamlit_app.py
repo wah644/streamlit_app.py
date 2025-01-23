@@ -58,7 +58,7 @@ def get_assistant_response_initial(user_input):
         groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
 
     completion = client.chat.completions.create(
-        model="llama3-70b-81922",
+        model="llama-3.3-70b-versatile",
         messages=groq_messages,
         temperature=1,
         max_completion_tokens=1024,
@@ -88,7 +88,7 @@ def get_assistant_response(user_input):
 
     # Send conversation history to API
     completion = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         messages=full_message,
         temperature=1,
         max_completion_tokens=1024,
