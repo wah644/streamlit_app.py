@@ -79,14 +79,26 @@ def get_assistant_response_initial(user_input):
     return completion.choices[0].message.content
 
 # Function to interact with Groq API for assistant responses
-def get_assistant_response(user_input):
-    groq_messages = [{"role": "user", "content": user_input}]
-    for message in messages:
-        groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
+# Initialize the conversation history
+conversation_history = [
+    {
+        "role": "system",
+        "content": (
+            "You are a clinician assistant chatbot specializing in genomic research and variant analysis. "
+            "Your task is to interpret user-provided genetic variant data, identify possible Mendelian diseases linked to genes."
+        ),
+    }
+]
 
+# Function to interact with Groq API for assistant responses
+def get_assistant_response(user_input):
+    # Add user input to conversation history
+    conversation_history.append({"role": "user", "content": user_input})
+
+    # Send conversation history to API
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=groq_messages,
+        messages=conversation_history,
         temperature=1,
         max_completion_tokens=1024,
         top_p=1,
@@ -94,7 +106,12 @@ def get_assistant_response(user_input):
         stop=None,
     )
 
-    return completion.choices[0].message.content
+    assistant_reply = completion.choices[0].message.content
+    
+    # Append assistant's reply to the conversation history
+    conversation_history.append({"role": "assistant", "content": assistant_reply})
+
+    return assistant_reply
 
 # Function to parse variant information
 def get_variant_info(message):
