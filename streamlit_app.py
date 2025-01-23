@@ -277,7 +277,8 @@ if user_input:
     )
         
         #FINAL CHATBOT
-        # Display chat history
+        if "messages" not in st.session_state:
+            st.session_state["messages"] = []
 
         # Display chat history
         for message in st.session_state["messages"]:
