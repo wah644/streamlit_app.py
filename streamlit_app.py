@@ -181,10 +181,28 @@ if user_input:
                 InterVar_results[2] = results.get("Gene", "Not Available")
             except JSONDecodeError as E:
                 pass
+
+        #color of acmg classification
+        def get_color(result):
+            if result == "Pathogenic":
+                return "red"
+            elif result == "Likely pathogenic":
+                return "red"
+            elif result == "Uncertain significance":
+                return "orange"
+            elif result == "Likely benign":
+                return "lightgreen"
+            elif result == "Benign":
+                return "green"
+            else:
+                return "black"  # Default color if no match
         
-        # Display results in a table
-        #st.write("### ACMG Results: ", GeneBe_results[0])
-        st.markdown(f"### ACMG Results: <span style='color:green'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
+        # Get the color for the result
+        result_color = get_color(GeneBe_results[0])
+        
+        # Display the ACMG results with the appropriate color
+        st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
+
         data = {
                      "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                     "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
