@@ -183,7 +183,8 @@ if user_input:
                 pass
         
         # Display results in a table
-        st.write("### ACMG Results: %s", GeneBe_results[0])
+        #st.write("### ACMG Results: ", GeneBe_results[0])
+        st.markdown(f"### ACMG Results: <span style='color:green'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
         data = {
                      "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                     "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
