@@ -271,7 +271,7 @@ if user_input:
         
         user_in = st.text_input("Ask me follow up questions, or type exit.")
         if user_in:
-            while user_in != 'exit' and user_in:
+            while user_in != 'exit' and user_in != "":
                 assistant_response = get_assistant_response(user_in)
                 st.markdown(
                 f"""
