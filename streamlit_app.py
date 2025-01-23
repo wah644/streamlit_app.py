@@ -277,35 +277,24 @@ if user_input:
     )
         
         #FINAL CHATBOT
-        # Initialize chat history in session state if it doesn't exist
-        # Initialize the session state for messages if not already initialized
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = []
+        # Display chat history
+
+        st.session_state["messages"]=[]
         
-        # Get user input using chat_input
-        chat_message = st.chat_input("Ask me follow-up questions!")
-        
-        # Check if the user input is not empty
-        if chat_message:
-            # Append user input to chat history
-            st.session_state["messages"].append({"role": "user", "content": chat_message})
-            
-            # Display user input in the chat interface
-            with st.chat_message("user"):
-                st.write(chat_message)
-            
-            # Generate assistant response inside a spinner
-            with st.chat_message("assistant"):
-                with st.spinner("Processing your query..."):
-                    assistant_response_2 = get_assistant_response(chat_message)
-                    st.write(assistant_response_2)
-                    
-                    # Append assistant's response to chat history only once
-                    st.session_state["messages"].append({"role": "assistant", "content": assistant_response_2})
-        
-        # Optionally, display the entire chat history in chronological order
         for message in st.session_state["messages"]:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
+        
+        
+        if chat_message := st.chat_input("Enter genetic variant information (e.g., chr1:12345(A>T)):"):
+            st.session_state["messages"].append({"role": "user", "content": chat_message})
+            with st.chat_message("user"):
+                st.write(chat_message)
+        
+            with st.chat_message("assistant"):
+                with st.spinner("Processing your query..."):
+                    response = get_assistant_response(chat_message)
+                    st.write(response)
+                    st.session_state["messages"].append({"role": "assistant", "content": response})
         
                 
