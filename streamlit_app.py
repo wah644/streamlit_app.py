@@ -71,7 +71,7 @@ def get_assistant_response_initial(user_input):
 
 # Function to interact with Groq API for assistant responses
 # Initialize the conversation history
-conversation_history = [
+SYSTEM = [
     {
         "role": "system",
         "content": (
@@ -84,12 +84,12 @@ conversation_history = [
 # Function to interact with Groq API for assistant responses
 def get_assistant_response(user_input):
     # Add user input to conversation history
-    conversation_history.append({"role": "user", "content": user_input})
+    full_message = {"role:":"system", "content":SYSTEM,"role": "user", "content": user_input}
 
     # Send conversation history to API
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=conversation_history,
+        messages=full_message,
         temperature=1,
         max_completion_tokens=1024,
         top_p=1,
@@ -98,11 +98,11 @@ def get_assistant_response(user_input):
     )
 
     assistant_reply = completion.choices[0].message.content
-    
-    # Append assistant's reply to the conversation history
-    conversation_history.append({"role": "assistant", "content": assistant_reply})
 
     return assistant_reply
+
+
+###################################################
 
 # Function to parse variant information
 def get_variant_info(message):
