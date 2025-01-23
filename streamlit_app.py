@@ -259,11 +259,11 @@ if user_input:
         
         # AI Tells me more
         user_input = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. "
-        assistant_response = get_assistant_response(user_input)
+        assistant_response_1 = get_assistant_response(user_input)
         st.markdown(
         f"""
         <div class="justified-text">
-            Assistant: {assistant_response}
+            Assistant: {assistant_response_1}
         </div>
         """,
         unsafe_allow_html=True,
@@ -273,11 +273,11 @@ if user_input:
         user_in = st.text_input("Ask me follow up questions, or type exit.")
         if user_in:
             while user_in != 'exit' and user_in != "":
-                assistant_response = get_assistant_response(user_in)
+                assistant_response_2 = get_assistant_response(user_in)
                 st.markdown(
                 f"""
                 <div class="justified-text">
-                    Assistant: {assistant_response}
+                    Assistant: {assistant_response_2}
                 </div>
                 """,
                 unsafe_allow_html=True,
