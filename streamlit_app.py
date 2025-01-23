@@ -211,7 +211,7 @@ if user_input:
                     st.write(matching_rows)
                     #disease_labels = matching_rows['DISEASE LABEL'].tolist()
                     disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
-
+                    st.write(disease_classification_dict)
                 else:
                     #st.write("No match found.")
                     st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
