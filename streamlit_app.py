@@ -193,22 +193,30 @@ if user_input:
 
 
         #SLIDER
-                # Variable to specify the value (you can set this dynamically or as needed)
-        pathogenicity_value = 'Likely pathogenic (LP)'
-        
         # Define the options for the scale
         options = ['Pathogenic (P)', 'Likely pathogenic (LP)', 'Uncertain significance (VUS)', 'Likely benign (LB)', 'Benign (B)']
         
-        # Create a select_slider with the string labels
-        classification = st.select_slider(
-            'Pathogenicity classification',
-            options=options,
-            value=pathogenicity_value  # Set the initial value to the predefined value
-        )
+        # Use custom CSS to make the label green
+        st.markdown("""
+            <style>
+                .green-text {
+                    color: white;
+                    font-size: 20px;
+                }
+            </style>
+        """, unsafe_allow_html=True)
         
-        # Display the selected classification
-        st.write('Classification:', classification)
-    
+        # Display the label with green text
+        st.markdown('<p class="green-text">Pathogenicity classification</p>', unsafe_allow_html=True)
+        
+        # Create a radio button to display the predefined value (non-editable)
+        st.radio(
+            '',
+            options=options,
+            index=options.index(pathogenicity_value),  # Set the predefined value
+            disabled=True  # Make it non-editable
+        )
+            
     
         #GENE-DISEASE DATABASE
         st.write("### ClinGen Gene-Disease Results")
