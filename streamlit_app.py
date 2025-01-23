@@ -280,6 +280,11 @@ if user_input:
         # Display chat history
 
         st.session_state["messages"]=[]
+
+        # Display chat history
+        for message in st.session_state["messages"]:
+            with st.chat_message(message["role"]):
+                st.write(message["content"])
         
         for message in st.session_state["messages"]:
             with st.chat_message(message["role"]):
