@@ -277,7 +277,7 @@ if user_input:
     )
         
         #FINAL CHATBOT
-        user_in = st.text_input("Ask me follow up questions!")
+        user_in = st.chat_input("Ask me follow up questions!")
         assistant_response_2 = get_assistant_response(user_in)
         st.markdown(
                 f"""
