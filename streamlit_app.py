@@ -218,6 +218,7 @@ if user_input:
         
         disease_labels = matching_result['DISEASE LABEL'].tolist()
 
+        st.write(disease_labels)
 
         # AI Tells me more
         user_input = f"Tell me about the diseases: {disease_labels}. These were found to be linked to the following genetic variant: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]}"
