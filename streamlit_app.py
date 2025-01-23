@@ -203,7 +203,7 @@ if user_input:
         
                 # Function to highlight the rows based on classification
         def highlight_classification(row):
-              color_map = {
+            color_map = {
                 "Definitive": "background-color: rgba(119, 221, 119, 0.65)",  # Pastel Green with 65% transparency
                 "Disputed": "background-color: rgba(255, 182, 182, 0.65)",  # Pastel Red with 65% transparency
                 "Moderate": "background-color: rgba(152, 255, 152, 0.65)",  # Pastel Light Green with 65% transparency
