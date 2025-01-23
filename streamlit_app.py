@@ -195,7 +195,7 @@ if user_input:
         #SLIDER
         pathogenicity_value = GeneBe_results[0]
         # Define the options for the scale
-        options = ['Pathogenic (P)', 'Likely pathogenic (LP)', 'Uncertain significance (VUS)', 'Likely benign (LB)', 'Benign (B)']
+        options = ['Pathogenic', 'Likely pathogenic', 'Uncertain significance', 'Likely benign', 'Benign']
         
         # Find the index of the predefined value in the options list
         value_index = options.index(pathogenicity_value)
