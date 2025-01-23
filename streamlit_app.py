@@ -209,7 +209,7 @@ if user_input:
                 matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 if not matching_rows.empty:
                     st.write(matching_rows)
-                    disease_labels = matching_result['DISEASE LABEL'].tolist()
+                    disease_labels = matching_rows['DISEASE LABEL'].tolist()
                 else:
                     st.write("No match found.")
             else:
