@@ -193,6 +193,7 @@ if user_input:
 
 
         #SLIDER
+        pathogenicity_value = 'Likely pathogenic (LP)'
         # Define the options for the scale
         options = ['Pathogenic (P)', 'Likely pathogenic (LP)', 'Uncertain significance (VUS)', 'Likely benign (LB)', 'Benign (B)']
         
