@@ -4,6 +4,7 @@ import requests
 from groq import Groq
 import pandas as pd
 
+disease_classification_dict
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
@@ -203,6 +204,7 @@ if user_input:
           # Function to find matching gene symbol and HGNC ID
         def find_gene_match(gene_symbol, hgnc_id):
             global disease_labels
+            global disease_classification_dict
             # Check if the gene symbol and HGNC ID columns exist in the data
             if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
