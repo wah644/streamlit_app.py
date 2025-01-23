@@ -193,7 +193,7 @@ if user_input:
 
 
         #SLIDER
-        pathogenicity_value = GeneBe_results[0]
+        pathogenicity_value = 'Uncertain significance'
         # Define the options for the scale
         options = ['Pathogenic', 'Likely pathogenic', 'Uncertain significance', 'Likely benign', 'Benign']
         
