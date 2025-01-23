@@ -211,7 +211,9 @@ if user_input:
                     st.write(matching_rows)
                     disease_labels = matching_rows['DISEASE LABEL'].tolist()
                 else:
-                    st.write("No match found.")
+                    #st.write("No match found.")
+                    st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
+
             else:
                 st.write("No existing gene-disease match found")
         
