@@ -209,7 +209,9 @@ if user_input:
                 matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 if not matching_rows.empty:
                     st.write(matching_rows)
-                    disease_labels = matching_rows['DISEASE LABEL'].tolist()
+                    #disease_labels = matching_rows['DISEASE LABEL'].tolist()
+                    disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
+
                 else:
                     #st.write("No match found.")
                     st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
