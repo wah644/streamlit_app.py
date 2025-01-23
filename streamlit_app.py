@@ -279,8 +279,6 @@ if user_input:
         #FINAL CHATBOT
         # Display chat history
 
-        st.session_state["messages"]=[]
-
         # Display chat history
         for message in st.session_state["messages"]:
             with st.chat_message(message["role"]):
