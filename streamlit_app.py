@@ -277,14 +277,31 @@ if user_input:
     )
         
         #FINAL CHATBOT
-        user_in = st.chat_input("Ask me follow up questions!")
-        assistant_response_2 = get_assistant_response(user_in)
-        st.markdown(
-                f"""
-                <div class="justified-text">
-                    Assistant: {assistant_response_2}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+       # Initialize chat history in session state if it doesn't exist
+        if "messages" not in st.session_state:
+            st.session_state["messages"] = []
+        
+        # Get user input using chat_input
+        user_input = st.chat_input("Ask me follow-up questions!")
+        
+        if user_input:
+            # Append user input to chat history
+            st.session_state["messages"].append({"role": "user", "content": user_input})
+        
+            # Display user input
+            with st.chat_message("user"):
+                st.write(user_input)
+        
+            # Generate assistant response inside a spinner
+            with st.chat_message("assistant"):
+                with st.spinner("Processing your query..."):
+                    assistant_response_2 = get_assistant_response(user_input)
+                    st.write(assistant_response_2)
+                    # Append assistant's response to chat history
+                    st.session_state["messages"].append({"role": "assistant", "content": assistant_response_2})
+        
+        # Optionally, display the entire chat history for context (optional)
+        for message in st.session_state["messages"]:
+            with st.chat_message(message["role"]):
+        st.write(message["content"])
 
