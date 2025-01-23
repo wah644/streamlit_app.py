@@ -204,12 +204,12 @@ if user_input:
        # Function to highlight the rows based on classification with 65% transparency
         def highlight_classification(row):
             color_map = {
-                "Definitive": "color: rgba(0, 128, 0)",  # Green
+                "Definitive": "color: rgba(66, 238, 66)",  # Green
                 "Disputed": "color: rgba(255, 0, 0)",  # Red 
                 "Moderate": "color: rgba(144, 238, 144)",  # Light Green 
                 "Limited": "color: rgba(255, 204, 102)",  # Orange 
                 "No Known Disease Relationship": "",
-                "Strong": "color: rgba(0, 128, 0)",  # Dark Green 
+                "Strong": "color: rgba(66, 238, 66)",  #  Green 
                 "Refuted": "color: rgba(255, 0, 0)"  # Red 
             }
             classification = row['CLASSIFICATION']
