@@ -190,6 +190,26 @@ if user_input:
                     "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                     }
         st.table(data)
+
+
+        #SLIDER
+        pathogenicity_value = GeneBe_results[0]
+        # Define the options for the scale
+        options = ['Pathogenic (P)', 'Likely pathogenic (LP)', 'Uncertain significance (VUS)', 'Likely benign (LB)', 'Benign (B)']
+        
+        # Find the index of the predefined value in the options list
+        value_index = options.index(pathogenicity_value)
+        
+        # Create a slider with the selected value
+        st.slider(
+            'Pathogenicity classification',
+            min_value=0,
+            max_value=4,
+            value=value_index,  # Set the initial value to the index of the predefined value
+            step=1,
+            format="%.0f",
+            disabled=True  # Make the slider unchangeable
+        )
     
     
         #GENE-DISEASE DATABASE
