@@ -290,16 +290,12 @@ if user_input:
             # Append user input to chat history
             st.session_state["messages"].append({"role": "user", "content": user_input})
             
-            # Display user input in the chat interface
-            with st.chat_message("user"):
             
-            # Generate assistant response inside a spinner
-            with st.chat_message("assistant"):
-                with st.spinner("Processing your query..."):
-                    assistant_response_2 = get_assistant_response(user_input)
+
+            assistant_response_2 = get_assistant_response(user_input)
                     
                     # Append assistant's response to chat history only once
-                    st.session_state["messages"].append({"role": "assistant", "content": assistant_response_2})
+            st.session_state["messages"].append({"role": "assistant", "content": assistant_response_2})
         
         # Optionally, display the entire chat history in chronological order
         for message in st.session_state["messages"]:
