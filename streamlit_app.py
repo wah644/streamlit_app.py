@@ -183,7 +183,7 @@ if user_input:
                 pass
         
         # Display results in a table
-        st.write("### ACMG Results")
+        st.write("### ACMG Results: %s", GeneBe_results[0])
         data = {
                      "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
                     "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
@@ -192,32 +192,6 @@ if user_input:
         st.table(data)
 
 
-        #SLIDER
-        pathogenicity_value = 'Likely pathogenic (LP)'
-        # Define the options for the scale
-        options = ['Pathogenic (P)', 'Likely pathogenic (LP)', 'Uncertain significance (VUS)', 'Likely benign (LB)', 'Benign (B)']
-        
-        # Use custom CSS to make the label green
-        st.markdown("""
-            <style>
-                .green-text {
-                    color: white;
-                    font-size: 20px;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-        
-        # Display the label with green text
-        st.markdown('<p class="green-text">Pathogenicity classification</p>', unsafe_allow_html=True)
-        
-        # Create a radio button to display the predefined value (non-editable)
-        st.radio(
-            '',
-            options=options,
-            index=options.index(pathogenicity_value),  # Set the predefined value
-            disabled=True  # Make it non-editable
-        )
-            
     
         #GENE-DISEASE DATABASE
         st.write("### ClinGen Gene-Disease Results")
