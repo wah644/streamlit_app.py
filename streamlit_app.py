@@ -218,7 +218,7 @@ if user_input:
                 return "red"
             elif result == "Uncertain significance":
                 return "orange"
-            elif result == "Likely benign":
+            elif result == "Likely_benign":
                 return "lightgreen"
             elif result == "Benign":
                 return "green"
