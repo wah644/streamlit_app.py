@@ -289,7 +289,7 @@ if user_input:
         # Check if the result has already been computed and stored in session state
         if "assistant_response_1" not in st.session_state:
             # AI tells me more
-            user_input_1 = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. if no diseases were found to be linked with the gene then apologize and say no disesases were found to be linked with the gene according to the ClinGen database. "
+            user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. if no diseases were found to be linked with the gene then apologize and say no disesases were found to be linked with the gene according to the ClinGen database. "
             
             # Call the AI function to get the response and store it in session state
             assistant_response_1 = get_assistant_response_1(user_input_1)
