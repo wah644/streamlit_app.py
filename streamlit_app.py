@@ -10,6 +10,7 @@ GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
 disease_labels = ['No disease found']
 flag = False
+ran = False
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
@@ -265,7 +266,7 @@ if user_input:
         find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
-        if flag == True:
+        if ran == False:
             user_input_1 = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. "
             assistant_response_1 = get_assistant_response(user_input_1)
             st.markdown(
@@ -276,6 +277,7 @@ if user_input:
             """,
             unsafe_allow_html=True,
         )
+            ran = True
         
         #FINAL CHATBOT
         if "messages" not in st.session_state:
