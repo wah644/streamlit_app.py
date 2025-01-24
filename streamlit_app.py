@@ -141,7 +141,7 @@ def get_variant_info(message):
         return []
 
 # Main Streamlit interaction loop
-user_input = st.text_input("Enter a genetic variant:")
+user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
 if user_input:
     # Get assistant's response
