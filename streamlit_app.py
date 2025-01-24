@@ -286,17 +286,24 @@ if user_input:
         find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
-        user_input_1 = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. "
-        assistant_response_1 = get_assistant_response_1(user_input_1)
+        # Check if the result has already been computed and stored in session state
+        if "assistant_response_1" not in st.session_state:
+            # AI tells me more
+            user_input_1 = f"Gene in interest: ACMG Classification: {GeneBe_results[0]}, Effect: {GeneBe_results[1]}, Gene Symbol: {GeneBe_results[2]}, Gene HGNC ID: {GeneBe_results[3]} The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. "
+            
+            # Call the AI function to get the response and store it in session state
+            assistant_response_1 = get_assistant_response_1(user_input_1)
+            st.session_state["assistant_response_1"] = assistant_response_1
+        
+        # Display the assistant's response (only the first time)
         st.markdown(
             f"""
             <div class="justified-text">
-                Assistant: {assistant_response_1}
+                Assistant: {st.session_state['assistant_response_1']}
             </div>
             """,
             unsafe_allow_html=True,
         )
-
         
         #FINAL CHATBOT
         if "messages" not in st.session_state:
@@ -308,7 +315,7 @@ if user_input:
                 st.write(message["content"])
         
         
-        if chat_message := st.chat_input("Enter genetic variant information (e.g., chr1:12345(A>T)):"):
+        if chat_message := st.chat_input("I can help explain diseases!"):
             st.session_state["messages"].append({"role": "user", "content": chat_message})
             with st.chat_message("user"):
                 st.write(chat_message)
