@@ -275,6 +275,7 @@ if user_input:
                 if not matching_rows.empty:
                     st.write(matching_rows.style.apply(highlight_classification, axis=1))
                     disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
+                    st.session_state["assistant_response_1"]=[]
                 else:
                     #st.write("No match found.")
                     st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
