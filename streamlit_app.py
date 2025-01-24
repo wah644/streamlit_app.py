@@ -275,7 +275,6 @@ if user_input:
                 if not matching_rows.empty:
                     st.write(matching_rows.style.apply(highlight_classification, axis=1))
                     disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
-                    st.session_state["assistant_response_1"]=[]
                 else:
                     #st.write("No match found.")
                     st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
@@ -287,24 +286,16 @@ if user_input:
         find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
-        # Check if the result has already been computed and stored in session state
-        if "assistant_response_1" not in st.session_state:
-            # AI tells me more
-            user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease. if no diseases were found to be linked with the gene then apologize and say no disesases were found to be linked with the gene according to the ClinGen database. "
-            
-            # Call the AI function to get the response and store it in session state
-            assistant_response_1 = get_assistant_response_1(user_input_1)
-            st.session_state["assistant_response_1"] = assistant_response_1
-        
-        # Display the assistant's response (only the first time)
+        assistant_response_1 = get_assistant_response_1(user_input_1)
         st.markdown(
             f"""
             <div class="justified-text">
-                Assistant: {st.session_state['assistant_response_1']}
+                Assistant: {assistant_response_1}
             </div>
             """,
             unsafe_allow_html=True,
         )
+
         
         #FINAL CHATBOT
         if "messages" not in st.session_state:
