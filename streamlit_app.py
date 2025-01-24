@@ -214,9 +214,9 @@ if user_input:
         def get_color(result):
             if result == "Pathogenic":
                 return "red"
-            elif result == "Likely pathogenic":
+            elif result == "Likely_pathogenic":
                 return "red"
-            elif result == "Uncertain significance":
+            elif result == "Uncertain_significance":
                 return "orange"
             elif result == "Likely_benign":
                 return "lightgreen"
