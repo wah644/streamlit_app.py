@@ -4,7 +4,7 @@ import requests
 from groq import Groq
 import pandas as pd
 
-disease_classification_dict = {}
+disease_classification_dict = {"No diseases found"}
 parts = []
 GeneBe_results = ['-','-','-','-']
 InterVar_results = ['-','-','-','-']
