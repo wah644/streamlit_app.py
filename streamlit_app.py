@@ -275,9 +275,12 @@ if user_input:
             # Check if the gene symbol and HGNC ID columns exist in the data
             if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
+                
                 matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
+                
                 if not matching_rows.empty:
-                    st.write(matching_rows.style.apply(highlight_classification, axis=1))
+                    selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'DISEASE ID (MONDO)']]
+                    st.write(selected_columns.style.apply(highlight_classification, axis=1))
                     disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
                 else:
                     #st.write("No match found.")
