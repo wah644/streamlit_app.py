@@ -52,6 +52,29 @@ initial_messages = [
     }
 ]
 
+        # Function to find matching gene symbol and HGNC ID
+def find_gene_match(gene_symbol, hgnc_id):
+    global disease_labels
+    global disease_classification_dict
+            
+        # Check if the gene symbol and HGNC ID columns exist in the data
+    if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
+                # Filter rows matching the gene symbol and HGNC ID
+                
+        matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
+                
+        if not matching_rows.empty:
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
+            st.write(selected_columns.style.apply(highlight_classification, axis=1))
+            disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
+        else:
+                    #st.write("No match found.")
+            st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
+        
+    else:
+        st.write("No existing gene-disease match found")
+        
+
 def get_color(result):
     if result == "Pathogenic":
         return "red"
@@ -247,6 +270,9 @@ if user_input != st.session_state.last_input:
             except JSONDecodeError as E:
                 pass
 
+                # Find and display the matching rows
+        find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
+
         user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
         reply = get_assistant_response_1(user_input_1)
 
@@ -275,30 +301,8 @@ df = pd.read_csv(file_url)
             
    
             
-        # Function to find matching gene symbol and HGNC ID
-def find_gene_match(gene_symbol, hgnc_id):
-    global disease_labels
-    global disease_classification_dict
-            
-        # Check if the gene symbol and HGNC ID columns exist in the data
-    if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
-                # Filter rows matching the gene symbol and HGNC ID
-                
-        matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
-                
-        if not matching_rows.empty:
-            selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
-            st.write(selected_columns.style.apply(highlight_classification, axis=1))
-            disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
-        else:
-                    #st.write("No match found.")
-            st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
-        
-    else:
-        st.write("No existing gene-disease match found")
-        
-        # Find and display the matching rows
-find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
+
+
         
         # AI Tells me more
             
