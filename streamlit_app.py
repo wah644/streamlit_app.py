@@ -176,7 +176,6 @@ if "last_input" not in st.session_state:
 user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
 if user_input != st.session_state.last_input:
-    global reply
     # Get assistant's response
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
