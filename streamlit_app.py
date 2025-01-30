@@ -6,7 +6,7 @@ import pandas as pd
 
 disease_classification_dict = {"No diseases found"}
 parts = []
-GeneBe_results = ['-','-','-','-','-','-','-']
+GeneBe_results = ['-','-','-','-','-','-','-','-']
 InterVar_results = ['-','-','-','-']
 disease_labels = ['No disease found']
 flag = False
