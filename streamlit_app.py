@@ -140,14 +140,14 @@ def get_variant_info(message):
         return []
 
 # Main Streamlit interaction loop
-if "initial_repsonse" not in st.session_state:
-    st.session_state.initial_repsonse = ""
+if "last_input" not in st.session_state:
+    st.session_state.last_input = ""
     
 user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
-if user_input:
+if user_input != st.session_state.last_input:
     # Get assistant's response
-    st.session_state.initial_repsonse = ""
+    st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
     
