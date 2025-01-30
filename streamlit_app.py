@@ -274,12 +274,6 @@ if user_input != st.session_state.last_input:
                 pass
 
                 # Find and display the matching rows
-        #GENE-DISEASE DATABASE
-        st.write("### ClinGen Gene-Disease Results")
-        find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
-
-        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-        reply = get_assistant_response_1(user_input_1)
 
         #color of acmg classification
 
@@ -298,8 +292,12 @@ st.table(data)
 
 
         # Load the CSV file
+        #GENE-DISEASE DATABASE
+st.write("### ClinGen Gene-Disease Results")
+find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
 
-            
+user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
+reply = get_assistant_response_1(user_input_1)
    
             
 
