@@ -236,7 +236,7 @@ if user_input:
         st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
 
         data = {
-                     "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
+                     "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", ""acmg score", "acmg criteria"],
                     "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
                     "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                     }
