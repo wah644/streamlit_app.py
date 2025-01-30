@@ -297,15 +297,13 @@ if user_input != st.session_state.last_input:
         
         # AI Tells me more
             
-        if st.session_state.initial_repsonse == "":
-            user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-            st.session_state.initial_repsonse = get_assistant_response_1(user_input_1)
-            
-        if st.session_state.initial_repsonse != "":
-            st.markdown(
+
+        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
+        reply = get_assistant_response_1(user_input_1)
+        st.markdown(
                 f"""
                 <div class="justified-text">
-                    Assistant: {st.session_state.initial_repsonse}
+                    Assistant: {reply}
                 </div>
                 """,
                 unsafe_allow_html=True,
