@@ -140,14 +140,15 @@ def get_variant_info(message):
         return []
 
 # Main Streamlit interaction loop
-if "inquiry" not in st.session_state:
-    st.session_state["inquiry"] = ""
+if "initial_repsonse" not in st.session_state:
+    st.session_state.initial_repsonse = ""
+    
+user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
-st.session_state["inquiry"] = user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
-
-if st.session_state["inquiry"]:
+if user_input:
     # Get assistant's response
-    assistant_response = get_assistant_response_initial(st.session_state["inquiry"])
+    st.session_state.initial_repsonse = ""
+    assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
     
     # Parse the variant if present
@@ -295,8 +296,6 @@ if st.session_state["inquiry"]:
         find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
-        if "initial_repsonse" not in st.session_state:
-            st.session_state.initial_repsonse = ""
             
         if st.session_state.initial_repsonse == "":
             user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
