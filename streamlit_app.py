@@ -311,27 +311,27 @@ if user_input != st.session_state.last_input:
 
         
         #FINAL CHATBOT
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = []
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
         
         # Display chat history
-        for message in st.session_state["messages"]:
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
+for message in st.session_state["messages"]:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
         
-        if chat_message := st.chat_input("I can help explain diseases!"):
+if chat_message := st.chat_input("I can help explain diseases!"):
             # Append user message to chat history
-            st.session_state["messages"].append({"role": "user", "content": chat_message})
+    st.session_state["messages"].append({"role": "user", "content": chat_message})
             
-            with st.chat_message("user"):
-                st.write(chat_message)
+    with st.chat_message("user"):
+        st.write(chat_message)
         
-            with st.chat_message("assistant"):
-                with st.spinner("Processing your query..."):
-                    response = get_assistant_response(st.session_state["messages"])  # Send full history
-                    st.write(response)
+    with st.chat_message("assistant"):
+        with st.spinner("Processing your query..."):
+            response = get_assistant_response(st.session_state["messages"])  # Send full history
+            st.write(response)
         
                     # Append assistant response to chat history
-                    st.session_state["messages"].append({"role": "assistant", "content": response})
+            st.session_state["messages"].append({"role": "assistant", "content": response})
                 
                 
