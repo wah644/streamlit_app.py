@@ -10,6 +10,7 @@ GeneBe_results = ['-','-','-','-','-','-','-','-']
 InterVar_results = ['-','-','-','-']
 disease_labels = ['No disease found']
 flag = False
+reply = ""
 
 
 # Set page configuration
@@ -50,6 +51,35 @@ initial_messages = [
         ),
     }
 ]
+
+def get_color(result):
+    if result == "Pathogenic":
+        return "red"
+    elif result == "Likely_pathogenic":
+        return "red"
+    elif result == "Uncertain_significance":
+        return "orange"
+    elif result == "Likely_benign":
+        return "lightgreen"
+    elif result == "Benign":
+        return "green"
+    else:
+        return "black"  # Default color if no match
+        
+
+# Function to highlight the rows based on classification with 65% transparency
+def highlight_classification(row):
+    color_map = {
+                "Definitive": "color: rgba(66, 238, 66)",  # Green
+                "Disputed": "color: rgba(255, 0, 0)",  # Red 
+                "Moderate": "color: rgba(144, 238, 144)",  # Light Green 
+                "Limited": "color: rgba(255, 204, 102)",  # Orange 
+                "No Known Disease Relationship": "",
+                "Strong": "color: rgba(66, 238, 66)",  #  Green 
+                "Refuted": "color: rgba(255, 0, 0)"  # Red 
+            }
+    classification = row['CLASSIFICATION']
+    return [color_map.get(classification, "")] * len(row)
 
 
 # Function to interact with Groq API for assistant responses
@@ -146,6 +176,7 @@ if "last_input" not in st.session_state:
 user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
 if user_input != st.session_state.last_input:
+    global reply
     # Get assistant's response
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
@@ -217,90 +248,64 @@ if user_input != st.session_state.last_input:
             except JSONDecodeError as E:
                 pass
 
+        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
+        reply = get_assistant_response_1(user_input_1)
+
         #color of acmg classification
-        def get_color(result):
-            if result == "Pathogenic":
-                return "red"
-            elif result == "Likely_pathogenic":
-                return "red"
-            elif result == "Uncertain_significance":
-                return "orange"
-            elif result == "Likely_benign":
-                return "lightgreen"
-            elif result == "Benign":
-                return "green"
-            else:
-                return "black"  # Default color if no match
-        
-        # Get the color for the result
-        result_color = get_color(GeneBe_results[0])
+
         
         # Display the ACMG results with the appropriate color
-        st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
-
-        data = {
-                     "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
-                    "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
-                    "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
+                # Get the color for the result
+result_color = get_color(GeneBe_results[0])
+st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
+data = {
+        "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
+        "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
+        "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                     }
-        st.table(data)
+st.table(data)
 
 
     
-        #GENE-DISEASE DATABASE
-        st.write("### ClinGen Gene-Disease Results")
+#GENE-DISEASE DATABASE
+st.write("### ClinGen Gene-Disease Results")
         # Load the CSV file
-
-        file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
-
-        df = pd.read_csv(file_url)
+file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
+df = pd.read_csv(file_url)
 
             
-       # Function to highlight the rows based on classification with 65% transparency
-        def highlight_classification(row):
-            color_map = {
-                "Definitive": "color: rgba(66, 238, 66)",  # Green
-                "Disputed": "color: rgba(255, 0, 0)",  # Red 
-                "Moderate": "color: rgba(144, 238, 144)",  # Light Green 
-                "Limited": "color: rgba(255, 204, 102)",  # Orange 
-                "No Known Disease Relationship": "",
-                "Strong": "color: rgba(66, 238, 66)",  #  Green 
-                "Refuted": "color: rgba(255, 0, 0)"  # Red 
-            }
-            classification = row['CLASSIFICATION']
-            return [color_map.get(classification, "")] * len(row)
+   
             
         # Function to find matching gene symbol and HGNC ID
-        def find_gene_match(gene_symbol, hgnc_id):
-            global disease_labels
-            global disease_classification_dict
+def find_gene_match(gene_symbol, hgnc_id):
+    global disease_labels
+    global disease_classification_dict
             
-            # Check if the gene symbol and HGNC ID columns exist in the data
-            if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
+        # Check if the gene symbol and HGNC ID columns exist in the data
+    if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
                 
-                matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
+        matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 
-                if not matching_rows.empty:
-                    selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
-                    st.write(selected_columns.style.apply(highlight_classification, axis=1))
-                    disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
-                else:
+        if not matching_rows.empty:
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
+            st.write(selected_columns.style.apply(highlight_classification, axis=1))
+            disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
+        else:
                     #st.write("No match found.")
-                    st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
         
-            else:
-                st.write("No existing gene-disease match found")
+    else:
+        st.write("No existing gene-disease match found")
         
         # Find and display the matching rows
-        find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
+find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
             
 
-        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-        reply = get_assistant_response_1(user_input_1)
-        st.markdown(
+       
+st.markdown(
                 f"""
                 <div class="justified-text">
                     Assistant: {reply}
