@@ -295,7 +295,7 @@ if user_input:
         if "initial_repsonse" not in st.session_state:
             st.session_state.initial_repsonse = ""
             
-        if st.session_state.count == "":
+        if st.session_state.initial_repsonse == "":
             user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
             st.session_state.initial_repsonse = get_assistant_response_1(user_input_1)
             st.markdown(
