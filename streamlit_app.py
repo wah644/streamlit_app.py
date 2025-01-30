@@ -293,7 +293,7 @@ if user_input:
         
         # AI Tells me more
         user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-        assistant_response_1 = get_assistant_response_1(user_input_1)
+        assistant_response_1 = get_assistant_response(user_input_1)
         st.markdown(
             f"""
             <div class="justified-text">
