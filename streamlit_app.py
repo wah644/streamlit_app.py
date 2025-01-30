@@ -102,15 +102,15 @@ def get_assistant_response_1(user_input):
     return assistant_reply
     
 
-# Function to interact with Groq API for assistant responses
-def get_assistant_response(user_input):
-    # Add user input to conversation history
-    full_message = SYSTEM + [{"role": "user", "content": user_input}]
+# Function to interact with Groq API for assistant response
+def get_assistant_response(chat_history):
+    # Combine system message with full chat history
+    full_conversation = SYSTEM + chat_history  
 
     # Send conversation history to API
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=full_message,
+        messages=full_conversation,
         temperature=1,
         max_completion_tokens=1024,
         top_p=1,
@@ -120,7 +120,6 @@ def get_assistant_response(user_input):
 
     assistant_reply = completion.choices[0].message.content
     return assistant_reply
-
 
 ###################################################
 
@@ -308,22 +307,25 @@ if user_input:
         #FINAL CHATBOT
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
-
+        
         # Display chat history
         for message in st.session_state["messages"]:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
         
-        
         if chat_message := st.chat_input("I can help explain diseases!"):
+            # Append user message to chat history
             st.session_state["messages"].append({"role": "user", "content": chat_message})
+            
             with st.chat_message("user"):
                 st.write(chat_message)
         
             with st.chat_message("assistant"):
                 with st.spinner("Processing your query..."):
-                    response = get_assistant_response(chat_message)
+                    response = get_assistant_response(st.session_state["messages"])  # Send full history
                     st.write(response)
-                    st.session_state["messages"].append({"role": "assistant", "content": response})
         
+                    # Append assistant response to chat history
+                    st.session_state["messages"].append({"role": "assistant", "content": response})
+                
                 
