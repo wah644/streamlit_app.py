@@ -279,7 +279,7 @@ if user_input:
                 matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 
                 if not matching_rows.empty:
-                    selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'DISEASE ID (MONDO)']]
+                    selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
                     st.write(selected_columns.style.apply(highlight_classification, axis=1))
                     disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
                 else:
