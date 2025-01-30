@@ -292,21 +292,20 @@ if user_input:
         find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
         
         # AI Tells me more
-        if "count" not in st.session_state:
-            st.session_state.count = 0
-
-        if st.session_state.count == 0:
+        if "initial_repsonse" not in st.session_state:
+            st.session_state.initial_repsonse = ""
+            
+        if st.session_state.count == "":
             user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-            assistant_response_1 = get_assistant_response_1(user_input_1)
+            st.session_state.initial_repsonse = get_assistant_response_1(user_input_1)
             st.markdown(
                 f"""
                 <div class="justified-text">
-                    Assistant: {assistant_response_1}
+                    Assistant: {st.session_state.initial_repsonse}
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            st.session_state.count += 1;
 
         
         #FINAL CHATBOT
