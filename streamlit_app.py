@@ -183,6 +183,10 @@ if user_input:
                 GeneBe_results[1] = variant.get("effect", "Not Available")
                 GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
                 GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
+                GeneBe_results[4] = variant.get("dbsnp", "Not Available")
+                GeneBe_results[5] = variant.get("frequency_reference_population", "Not Available")
+                GeneBe_results[6] = variant.get("acmg_score", "Not Available")
+                GeneBe_results[7] = variant.get("acmg_criteria", "Not Available")
             except JSONDecodeError as E:
                 pass
                     
@@ -233,7 +237,7 @@ if user_input:
 
         data = {
                      "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID"],
-                    "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3]],
+                    "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
                     "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
                     }
         st.table(data)
