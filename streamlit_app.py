@@ -54,6 +54,7 @@ initial_messages = [
             "and provide concise responses. If the user enters variants, you are to respond in a CSV format as such: "
             "chromosome,position,ref base,alt base,and if no genome is provided, assume hg38. Example: "
             "User input: chr6:160585140-T>G. You respond: 6,160585140,T,G,hg38. This response should be standalone with no extra texts. "
+            "Only 1 variant can be entered, if multiple are entered, remind the user to only enter 1."
             "Remember bases can be multiple letters (e.g., chr6:160585140-T>GG). If the user has additional requests with the message "
             "including the variant (e.g., 'tell me about diseases linked with the variant: chr6:160585140-T>G'), "
             "Remember, ref bases can simply be deleted (no alt base) and therefore the alt base value can be left blank. Example:"
@@ -74,6 +75,18 @@ df = pd.read_csv(file_url)
 
 
 #ALL FUNCTIONS
+def convert_variant_format(variant: str) -> str:
+    """Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'."""
+    import re
+    match = re.match(r'chr(\d+):([0-9]+)-([ACGT]+)>([ACGT]*)', variant)
+    if match:
+        chrom, position, ref, alt = match.groups()
+        alt = alt if alt else ""  # Handle cases where alt is missing
+        return f"{chrom},{position},{ref},{alt},hg38"
+    else:
+        raise ValueError("Invalid variant format")
+
+
 def snp_to_vcf(snp_value):
     global alleles
     global formatted_alleles
@@ -259,8 +272,7 @@ if user_input != st.session_state.last_input:
         # Fetch alleles from NCBI
         snp_variant = snp_to_vcf(snp_id)
         selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-        assistant_response = get_assistant_response_initial(selected_allele)
-        st.write(f"Assistant: {assistant_response}")
+        assistant_response = convert_variant_format(selected_allele)
             
  
     # Parse the variant if present
