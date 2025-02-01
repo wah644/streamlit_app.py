@@ -7,8 +7,8 @@ import pandas as pd
 parts = []
 
 # Set page configuration
-# Set page configuration
-st.set_page_config(page_title="DxVar", layout="centered")
+
+st.set_page_config(page_title="DxVar", layout="wide")  # Changed from "centered" to "wide"
 
 st.markdown("""
     <style>
@@ -16,9 +16,14 @@ st.markdown("""
             text-align: justify;
         }
         .results-table {
-            max-width: 60%
             margin-left: auto;
             margin-right: auto;
+        }
+        .block-container {
+            max-width: 1000px;  # Adjust this value to your preferred width
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            margin: 0 auto;
         }
     </style>
 """, unsafe_allow_html=True)
