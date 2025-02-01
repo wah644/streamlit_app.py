@@ -259,7 +259,9 @@ if user_input != st.session_state.last_input:
         
         if snp_variant:
             selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-            st.write(selected_allele)
+            assistant_response = get_assistant_response_initial(user_input)
+            st.write(f"Assistant: {assistant_response}")
+            
  
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
