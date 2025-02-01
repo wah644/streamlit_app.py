@@ -71,31 +71,50 @@ df = pd.read_csv(file_url)
 
 
 #ALL FUNCTIONS
+def snp_to_vcf(snp_value):
+    url = "https://clinicaltables.nlm.nih.gov/api/snps/v3/search"
+    params = {
+        "df": "rsNum,38.chr,38.pos,38.alleles,38.gene",
+        "terms": rs_number
+    }
+    
+    # Send the GET request
+    response = requests.get(url, params=params)
+    
+    # Check if the response is successful
+    if response.status_code == 200:
+        data = response.json()
+        # Extracting data
+        chr_num = data[3][0][1]       # Chromosome number
+        pos = int(data[3][0][2]) + 1  # Adjusting position (if 0-based, add 1)
+        alleles = data[3][0][3]       # Alleles
+        
+        # Print results
+        print("Chromosome:", chr_num)
+        print("Position:", pos)
+        print("Alleles:", alleles)
+
+        return data
+else:
+        # Handle any errors if the request fails
+    return f"Error: {response.status_code}, {response.text}"
 
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
-            
         # Check if the gene symbol and HGNC ID columns exist in the data
     if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
-                
         matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
-                
         if not matching_rows.empty:
-
             selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']]
-            
             # Apply the styling function
             styled_table = selected_columns.style.apply(highlight_classification, axis=1)
-            
             # Display the table with scrolling
             st.dataframe(styled_table, use_container_width=True)
-            
             st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
         else:
                     #st.write("No match found.")
             st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
-        
     else:
         st.write("No existing gene-disease match found")
         
@@ -232,18 +251,12 @@ if user_input != st.session_state.last_input:
         snp_id = user_input.split()[0]  # Extract SNP ID (e.g., rs121913514)
         
         # Fetch alleles from NCBI
-        alleles = fetch_alleles(snp_id)
+        snp_variant = snp_to_vcf(snp_id)
         
-        if alleles:
+        if snp_variant:
             st.success(f"Found alleles for {snp_id}: {', '.join(alleles)}")
             selected_allele = st.selectbox("Select an allele:", alleles)
-
-            if st.button("Proceed with Variant Interpretation"):
-                with st.chat_message("assistant"):
-                    st.write(f"Interpreting variant {snp_id} with allele {selected_allele}...")
-                    st.session_state.messages.append({"role": "assistant", "content": f"Interpreting {snp_id} with allele {selected_allele}..."})
-                    
-    
+ 
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
     
