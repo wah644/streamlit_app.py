@@ -75,7 +75,7 @@ def snp_to_vcf(snp_value):
     url = "https://clinicaltables.nlm.nih.gov/api/snps/v3/search"
     params = {
         "df": "rsNum,38.chr,38.pos,38.alleles,38.gene",
-        "terms": rs_number
+        "terms": snp_value
     }
     
     # Send the GET request
