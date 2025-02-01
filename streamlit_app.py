@@ -297,10 +297,10 @@ if user_input != st.session_state.last_input:
 
 
         # Create DataFrame from your dictionary
-        comparison_df = pd.DataFrame(data)
-        
+        acmg_results = pd.DataFrame(data)
+        acmg_results.set_index("Attribute", inplace=True)
         # Display the styled table
-        st.write(comparison_df)
+        st.write(acmg_results)
 
         st.table(data)
         
