@@ -55,6 +55,8 @@ initial_messages = [
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
 df = pd.read_csv(file_url)
 
+
+#ALL FUNCTIONS
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
     global disease_labels
@@ -280,26 +282,25 @@ if user_input != st.session_state.last_input:
         
         # Display the ACMG results with the appropriate color
                 # Get the color for the result
-result_color = get_color(GeneBe_results[0])
-st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
-data = {
-        "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
-        "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
-        "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
-                    }
-st.table(data)
-
-
-
-        # Load the CSV file
-        #GENE-DISEASE DATABASE
-st.write("### ClinGen Gene-Disease Results")
-find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
-
-user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-reply = get_assistant_response_1(user_input_1)
-   
-            
+        result_color = get_color(GeneBe_results[0])
+        st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
+        data = {
+                "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
+                "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
+                "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
+                            }
+        st.table(data)
+        
+        
+        
+                #GENE-DISEASE DATABASE
+        st.write("### ClinGen Gene-Disease Results")
+        find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
+        
+        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
+        reply = get_assistant_response_1(user_input_1)
+           
+                    
 
 
         
