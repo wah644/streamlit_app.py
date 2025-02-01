@@ -6,8 +6,6 @@ import pandas as pd
 
 disease_classification_dict = {"No diseases found"}
 parts = []
-GeneBe_results = ['-','-','-','-','-','-','-','-']
-InterVar_results = ['-','-','-','-']
 disease_labels = ['No disease found']
 flag = False
 reply = ""
@@ -33,6 +31,20 @@ st.title("DxVar")
 
 # Initialize Groq API client
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
+if "GeneBe_results" not in st.session_state:
+    st.session_state.GeneBe_results = ['-','-','-','-','-','-','-','-']
+if "InterVar_results" not in st.session_state:
+    st.session_state.InterVar_results = ['-','-','-','-']
+if "disease_labels" not in st.session_state:
+    st.session_state.disease_labels = ['No disease found']
+if "disease_classification_dict" not in st.session_state:
+    st.session_state.disease_classification_dict = {"No diseases found"}
+if "parts" not in st.session_state:
+    st.session_state.parts = []
+if "flag" not in st.session_state:
+    st.session_state.flag = False
+
 
 # Define the initial system message
 initial_messages = [
@@ -240,14 +252,14 @@ if user_input != st.session_state.last_input:
             try:
                 data = response.json()
                 variant = data["variants"][0]  # Get the first variant
-                GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
-                GeneBe_results[1] = variant.get("effect", "Not Available")
-                GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
-                GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
-                GeneBe_results[4] = variant.get("dbsnp", "Not Available")
-                GeneBe_results[5] = variant.get("frequency_reference_population", "Not Available")
-                GeneBe_results[6] = variant.get("acmg_score", "Not Available")
-                GeneBe_results[7] = variant.get("acmg_criteria", "Not Available")
+                st.session_state.GeneBe_results[0] = variant.get("acmg_classification", "Not Available")
+                st.session_state.GeneBe_results[1] = variant.get("effect", "Not Available")
+                st.session_state.GeneBe_results[2] = variant.get("gene_symbol", "Not Available")
+                st.session_state.GeneBe_results[3] = variant.get("gene_hgnc_id", "Not Available")
+                st.session_state.GeneBe_results[4] = variant.get("dbsnp", "Not Available")
+                st.session_state.GeneBe_results[5] = variant.get("frequency_reference_population", "Not Available")
+                st.session_state.GeneBe_results[6] = variant.get("acmg_score", "Not Available")
+                st.session_state.GeneBe_results[7] = variant.get("acmg_criteria", "Not Available")
             except JSONDecodeError as E:
                 pass
                     
@@ -270,8 +282,8 @@ if user_input != st.session_state.last_input:
             try:
                 results = response.json()
                 # Assuming the results contain ACMG classification and other details
-                InterVar_results[0] = results.get("Intervar", "Not Available")
-                InterVar_results[2] = results.get("Gene", "Not Available")
+                st.session_state.InterVar_results[0] = results.get("Intervar", "Not Available")
+                st.session_state.InterVar_results[2] = results.get("Gene", "Not Available")
             except JSONDecodeError as E:
                 pass
 
@@ -282,12 +294,12 @@ if user_input != st.session_state.last_input:
         
         # Display the ACMG results with the appropriate color
                 # Get the color for the result
-        result_color = get_color(GeneBe_results[0])
-        st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{GeneBe_results[0]}</span>", unsafe_allow_html=True)
+        result_color = get_color(st.session_state.GeneBe_results[0])
+        st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{st.session_state.GeneBe_results[0]}</span>", unsafe_allow_html=True)
         data = {
                 "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
-                "GeneBe Results": [GeneBe_results[0], GeneBe_results[1], GeneBe_results[2], GeneBe_results[3], GeneBe_results[4], GeneBe_results[5], GeneBe_results[6], GeneBe_results[7]],
-                "InterVar Results": [InterVar_results[0], InterVar_results[1], InterVar_results[2], InterVar_results[3]],
+                "GeneBe Results": [st.session_state.GeneBe_results[0], st.session_state.GeneBe_results[1], st.session_state.GeneBe_results[2], st.session_state.GeneBe_results[3], st.session_state.GeneBe_results[4], st.session_state.GeneBe_results[5], st.session_state.GeneBe_results[6], st.session_state.GeneBe_results[7]],
+                "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3]],
                             }
         st.table(data)
         
@@ -295,7 +307,7 @@ if user_input != st.session_state.last_input:
         
                 #GENE-DISEASE DATABASE
         st.write("### ClinGen Gene-Disease Results")
-        find_gene_match(GeneBe_results[2], 'HGNC:'+str(GeneBe_results[3]))
+        find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
         
         user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
         reply = get_assistant_response_1(user_input_1)
