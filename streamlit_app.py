@@ -43,7 +43,9 @@ if "flag" not in st.session_state:
     st.session_state.flag = False
 if "reply" not in st.session_state:
     st.session_state.reply = ""
-
+if "selected_option" not in st.session_state:
+    st.session_state.selected_option = None
+    
 # Define the initial system message
 initial_messages = [
     {
@@ -269,10 +271,10 @@ if user_input != st.session_state.last_input:
         snp_id = user_input.split()[0]
         snp_to_vcf(snp_id)
         if len(formatted_alleles) > 1:
-            selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-            assistant_response = convert_variant_format(selected_allele)
+            st.session_state.selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
+            assistant_response = convert_variant_format(st.session_state.selected_option)
         else:
-            assistant_response = convert_variant_format(formatted_alleles[0])
+            assistant_response = convert_variant_format(st.session_state.selected_option[0])
             
     # Parse the variant if present
     st.write(f"Assistant: {assistant_response}")
