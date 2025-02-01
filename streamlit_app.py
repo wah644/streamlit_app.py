@@ -70,6 +70,25 @@ df = pd.read_csv(file_url)
 
 
 #ALL FUNCTIONS
+
+def fetch_alleles(snp_id):
+    url = f"https://www.ncbi.nlm.nih.gov/snp/{snp_id}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Find the allele section
+        allele_section = soup.find(string="Alleles")
+        if allele_section:
+            parent_element = allele_section.find_parent()
+            if parent_element:
+                allele_text = parent_element.find_next_sibling().text
+                alleles = [allele.strip() for allele in allele_text.split('/') if allele.strip()]
+                return alleles
+    return None
+
+
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
             
@@ -225,6 +244,22 @@ if user_input != st.session_state.last_input:
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
     st.write(f"Assistant: {assistant_response}")
+    
+    if user_input.lower().startswith("rs"):
+        snp_id = user_input.split()[0]  # Extract SNP ID (e.g., rs121913514)
+        
+        # Fetch alleles from NCBI
+        alleles = fetch_alleles(snp_id)
+        
+        if alleles:
+            st.success(f"Found alleles for {snp_id}: {', '.join(alleles)}")
+            selected_allele = st.selectbox("Select an allele:", alleles)
+
+            if st.button("Proceed with Variant Interpretation"):
+                with st.chat_message("assistant"):
+                    st.write(f"Interpreting variant {snp_id} with allele {selected_allele}...")
+                    st.session_state.messages.append({"role": "assistant", "content": f"Interpreting {snp_id} with allele {selected_allele}..."})
+                    
     
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
