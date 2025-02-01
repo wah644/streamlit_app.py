@@ -20,7 +20,7 @@ st.markdown("""
             margin-right: auto;
         }
         .block-container {
-            max-width: 850;  # Adjust this value to your preferred width
+            max-width: 850px;  # Adjust this value to your preferred width
             padding-top: 2rem;
             padding-bottom: 2rem;
             margin: 0 auto;
