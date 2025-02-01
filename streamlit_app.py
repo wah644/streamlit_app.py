@@ -13,15 +13,16 @@ st.set_page_config(page_title="DxVar", layout="centered")
 
 st.markdown("""
     <style>
-        .block-container {
-            max-width: 850px;
-            padding-top: 1rem;
-            padding-right: 1rem;
-            padding-left: 1rem;
-            padding-bottom: 1rem;
+        .justified-text {
+            text-align: justify;
+        }
+        .results-table {
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 
@@ -293,16 +294,12 @@ if user_input != st.session_state.last_input:
                 "GeneBe Results": [st.session_state.GeneBe_results[0], st.session_state.GeneBe_results[1], st.session_state.GeneBe_results[2], st.session_state.GeneBe_results[3], st.session_state.GeneBe_results[4], st.session_state.GeneBe_results[5], st.session_state.GeneBe_results[6], st.session_state.GeneBe_results[7]],
                 "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3], '', '', '', ''],
                             }
-
-
-
         # Create DataFrame from your dictionary
         acmg_results = pd.DataFrame(data)
         acmg_results.set_index("Attribute", inplace=True)
         # Display the styled table
         st.write(acmg_results)
 
-        st.table(data)
         
         
         
@@ -326,11 +323,15 @@ else:
         result_color = get_color(st.session_state.GeneBe_results[0])
         st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{st.session_state.GeneBe_results[0]}</span>", unsafe_allow_html=True)
         data = {
-                "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
+                "Attribute": ["Classification", "Effect", "Gene", "HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
                 "GeneBe Results": [st.session_state.GeneBe_results[0], st.session_state.GeneBe_results[1], st.session_state.GeneBe_results[2], st.session_state.GeneBe_results[3], st.session_state.GeneBe_results[4], st.session_state.GeneBe_results[5], st.session_state.GeneBe_results[6], st.session_state.GeneBe_results[7]],
-                "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3]],
+                "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3], '', '', '', ''],
                             }
-        st.table(data)
+        # Create DataFrame from your dictionary
+        acmg_results = pd.DataFrame(data)
+        acmg_results.set_index("Attribute", inplace=True)
+        # Display the styled table
+        st.write(acmg_results)
         st.write("### ClinGen Gene-Disease Results")
         find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
         st.markdown(
