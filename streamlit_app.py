@@ -311,6 +311,13 @@ if user_input != st.session_state.last_input:
 
 else:
     if st.session_state.GeneBe_results:
+        result_color = get_color(st.session_state.GeneBe_results[0])
+        st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{st.session_state.GeneBe_results[0]}</span>", unsafe_allow_html=True)
+        data = {
+                "Attribute": ["ACMG Classification", "Effect", "Gene Symbol", "Gene HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
+                "GeneBe Results": [st.session_state.GeneBe_results[0], st.session_state.GeneBe_results[1], st.session_state.GeneBe_results[2], st.session_state.GeneBe_results[3], st.session_state.GeneBe_results[4], st.session_state.GeneBe_results[5], st.session_state.GeneBe_results[6], st.session_state.GeneBe_results[7]],
+                "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3]],
+                            }
         st.table(data)
         st.write("### ClinGen Gene-Disease Results")
         find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
