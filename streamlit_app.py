@@ -113,6 +113,7 @@ def snp_to_vcf(snp_value):
         alleles = data[3][0][3].split(', ')       # Alleles
 
         # Print results
+        st.write(formatted_alleles)
         formatted_alleles = [f"chr{chr_num}:{pos}-{a.replace('/', '>')}" for a in alleles]
 
     else:
