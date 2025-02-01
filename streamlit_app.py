@@ -123,7 +123,7 @@ def get_assistant_response_initial(user_input):
         model="llama-3.3-70b-versatile",
         messages=groq_messages,
         temperature=1,
-        max_completion_tokens=1024,
+        max_completion_tokens=512,
         top_p=1,
         stream=False,
         stop=None,
