@@ -25,17 +25,24 @@ st.markdown("""
             padding-bottom: 2rem;
             margin: 0 auto;
         }
-        .stTextInput, .stTextArea {
+        /* Target the chat input specifically */
+        .stChatMessageInput {
             max-width: 1000px;
             margin: 0 auto;
         }
-        /* This will affect the chat input container */
-        .stChatInput {
+        /* Target the container of the chat input */
+        .stChatMessage {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        [data-testid="stChatInput"] {
             max-width: 1000px;
             margin: 0 auto;
         }
     </style>
 """, unsafe_allow_html=True)
+
+
 st.title("DxVar")
 
 # Initialize Groq API client
