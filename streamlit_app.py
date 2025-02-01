@@ -82,7 +82,7 @@ def find_gene_match(gene_symbol, hgnc_id):
             styled_table = selected_columns.style.apply(highlight_classification, axis=1)
             
             # Display the table with scrolling
-            st.dataframe(styled_table, use_container_width=True, height=500)
+            st.dataframe(styled_table, use_container_width=True, length=500)
             
             st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
         else:
