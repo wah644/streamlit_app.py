@@ -77,13 +77,10 @@ def find_gene_match(gene_symbol, hgnc_id):
         if not matching_rows.empty:
 
             # Set 'DISEASE LABEL' as the index
-            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']]
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']].set_index('CLASSIFICATION')
             
             # Apply the styling function
             styled_table = selected_columns.style.apply(highlight_classification, axis=1)
-            
-            # Hide the index column by resetting the index (this removes it)
-            styled_table.hide(axis="index")
             
             # Display the table ensuring no cut-off and using full width
             st.dataframe(styled_table, use_container_width=True)
