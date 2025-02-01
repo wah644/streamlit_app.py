@@ -56,6 +56,8 @@ initial_messages = [
             "including the variant (e.g., 'tell me about diseases linked with the variant: chr6:160585140-T>G'), "
             "ask them to enter only the variant first. They can ask follow-up questions afterward. "
             "The user can enter the variant in any format, but it should be the variant alone with no follow-up questions."
+            "If the user enters an rs value simply return the rs value, example:"
+            "User input: tell me about rs1234. You respond: rs1234"
         ),
     }
 ]
