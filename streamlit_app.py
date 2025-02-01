@@ -41,6 +41,8 @@ if "disease_classification_dict" not in st.session_state:
     st.session_state.disease_classification_dict = {"No diseases found"}
 if "flag" not in st.session_state:
     st.session_state.flag = False
+if "rs_val_flag" not in st.session_state:
+    st.session_state.rs_val_flag = False
 if "reply" not in st.session_state:
     st.session_state.reply = ""
 if "selected_option" not in st.session_state:
@@ -262,12 +264,13 @@ if "last_input" not in st.session_state:
     
 user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
-if user_input != st.session_state.last_input:
+if user_input != st.session_state.last_input or st.session_state.rs_val_flag == True:
     # Get assistant's response
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
     
     if user_input.lower().startswith("rs"):
+        st.session_state.rs_val_flag = True
         snp_id = user_input.split()[0]
         snp_to_vcf(snp_id)
         if len(formatted_alleles) > 1:
@@ -275,6 +278,8 @@ if user_input != st.session_state.last_input:
             assistant_response = convert_variant_format(st.session_state.selected_option)
         else:
             assistant_response = convert_variant_format(st.session_state.selected_option[0])
+    else:
+        st.session_state.rs_val_flag = False
             
     # Parse the variant if present
     st.write(f"Assistant: {assistant_response}")
