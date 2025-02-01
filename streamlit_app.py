@@ -34,7 +34,7 @@ client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 if "GeneBe_results" not in st.session_state:
     st.session_state.GeneBe_results = ['-','-','-','-','-','-','-','-']
 if "InterVar_results" not in st.session_state:
-    st.session_state.InterVar_results = ['-','-','-','-']
+    st.session_state.InterVar_results = ['-','','-','']
 if "disease_classification_dict" not in st.session_state:
     st.session_state.disease_classification_dict = {"No diseases found"}
 if "flag" not in st.session_state:
