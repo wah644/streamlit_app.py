@@ -7,7 +7,6 @@ import re
 
 
 parts = []
-alleles = []
 formatted_alleles =[]
 # Set page configuration
 
@@ -93,7 +92,6 @@ def convert_variant_format(variant: str) -> str:
 
 
 def snp_to_vcf(snp_value):
-    global alleles
     global formatted_alleles
     url = "https://clinicaltables.nlm.nih.gov/api/snps/v3/search"
     params = {
@@ -113,11 +111,7 @@ def snp_to_vcf(snp_value):
         alleles = data[3][0][3].split(', ')       # Alleles
 
         # Print results
-        st.write(chr_num)
-        st.write(pos)
-        st.write(alleles)
         formatted_alleles = [f"chr{chr_num}:{pos}-{a.replace('/', '>')}" for a in alleles]
-        st.write(formatted_alleles)
 
     else:
         # Handle any errors if the request fails
