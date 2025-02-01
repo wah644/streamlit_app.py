@@ -91,9 +91,9 @@ def snp_to_vcf(snp_value):
         alleles = data[3][0][3]       # Alleles
         
         # Print results
-        print("Chromosome:", chr_num)
-        print("Position:", pos)
-        print("Alleles:", alleles)
+        st.write("Chromosome:", chr_num)
+        st.write("Position:", pos)
+        st.write("Alleles:", alleles)
 
         return data
     else:
