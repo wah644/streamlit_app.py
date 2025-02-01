@@ -26,12 +26,12 @@ st.markdown("""
             margin: 0 auto;
         }
         /* Target the chat input specifically */
-        .stChatMessageInput {
+        .stChatInput {
             max-width: 1000px;
-            margin: 0 auto;
+            margin: auto;
         }
         /* Target the container of the chat input */
-        .stChatMessage {
+        .stChatInput {
             max-width: 1000px;
             margin: 0 auto;
         }
