@@ -75,20 +75,15 @@ def find_gene_match(gene_symbol, hgnc_id):
         matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 
         if not matching_rows.empty:
+
             # Set 'DISEASE LABEL' as the index
-            # Set 'DISEASE LABEL' as the index
-            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']].set_index('DISEASE LABEL')
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']]
             
             # Apply the styling function
             styled_table = selected_columns.style.apply(highlight_classification, axis=1)
             
-            # Hide the first column (index column)
-            styled_table.set_table_styles(
-                [{'selector': 'thead th:first-child', 'props': [('display', 'none')]},  # Hide first column header
-                 {'selector': 'tbody td:first-child', 'props': [('display', 'none')]},  # Hide first column data
-                ],
-                overwrite=True
-            )
+            # Hide the index column by resetting the index (this removes it)
+            styled_table.hide(axis="index")
             
             # Display the table ensuring no cut-off and using full width
             st.dataframe(styled_table, use_container_width=True)
