@@ -76,13 +76,12 @@ def find_gene_match(gene_symbol, hgnc_id):
                 
         if not matching_rows.empty:
 
-            # Set 'DISEASE LABEL' as the index
-            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']].set_index('CLASSIFICATION')
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']]
             
             # Apply the styling function
             styled_table = selected_columns.style.apply(highlight_classification, axis=1)
             
-            # Display the table ensuring no cut-off and using full width
+            # Display the table with scrolling
             st.dataframe(styled_table, use_container_width=True)
             
             st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
