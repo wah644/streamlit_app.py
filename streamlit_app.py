@@ -291,7 +291,7 @@ if user_input != st.session_state.last_input:
         data = {
                 "Attribute": ["Classification", "Effect", "Gene", "HGNC ID","dbsnp", "freq. ref. pop.", "acmg score", "acmg criteria"],
                 "GeneBe Results": [st.session_state.GeneBe_results[0], st.session_state.GeneBe_results[1], st.session_state.GeneBe_results[2], st.session_state.GeneBe_results[3], st.session_state.GeneBe_results[4], st.session_state.GeneBe_results[5], st.session_state.GeneBe_results[6], st.session_state.GeneBe_results[7]],
-                "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3]],
+                "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3], '', '', '', ''],
                             }
 
 
