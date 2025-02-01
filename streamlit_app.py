@@ -116,8 +116,8 @@ def snp_to_vcf(snp_value):
         st.write(chr_num)
         st.write(pos)
         st.write(alleles)
-        st.write(formatted_alleles)
         formatted_alleles = [f"chr{chr_num}:{pos}-{a.replace('/', '>')}" for a in alleles]
+        st.write(formatted_alleles)
 
     else:
         # Handle any errors if the request fails
