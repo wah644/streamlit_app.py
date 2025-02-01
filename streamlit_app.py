@@ -95,9 +95,9 @@ def snp_to_vcf(snp_value):
         print("Alleles:", alleles)
 
         return data
-else:
+    else:
         # Handle any errors if the request fails
-    return f"Error: {response.status_code}, {response.text}"
+        return f"Error: {response.status_code}, {response.text}"
 
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
