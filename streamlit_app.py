@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 from groq import Groq
 import pandas as pd
+import re
 
 
 parts = []
@@ -81,13 +82,13 @@ df = pd.read_csv(file_url)
 #ALL FUNCTIONS
 def convert_variant_format(variant: str) -> str:
     """Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'."""
-    import re
     match = re.match(r'chr(\d+):([0-9]+)-([ACGT]+)>([ACGT]*)', variant)
     if match:
         chrom, position, ref, alt = match.groups()
         alt = alt if alt else ""  # Handle cases where alt is missing
         return f"{chrom},{position},{ref},{alt},hg38"
     else:
+        st.write(variant)
         raise ValueError("Invalid variant format")
 
 
