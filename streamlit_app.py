@@ -110,11 +110,8 @@ def snp_to_vcf(snp_value):
         chr_num = data[3][0][1]       # Chromosome number
         pos = int(data[3][0][2]) + 1  # Adjusting position (if 0-based, add 1)
         alleles = data[3][0][3].split(', ')       # Alleles
-        
+
         # Print results
-        st.write("Chromosome:", chr_num)
-        st.write("Position:", pos)
-        st.write("Alleles:", alleles)
         formatted_alleles = [f"chr{chr_num}:{pos}-{a.replace('/', '>')}" for a in alleles]
 
     else:
