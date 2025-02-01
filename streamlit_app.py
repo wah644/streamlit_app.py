@@ -7,30 +7,20 @@ import pandas as pd
 parts = []
 
 # Set page configuration
-st.set_page_config(page_title="DxVar", layout="wide")  # Changed to 'wide' for more space
+# Set page configuration
+st.set_page_config(page_title="DxVar", layout="centered")
 
 st.markdown("""
     <style>
-        /* Expands the main content area */
-        .main .block-container {
-            max-width: 25%;  /* Adjust width as needed */
-            padding-left: 2rem;
-            padding-right: 2rem;
-        }
-
-        /* Justified text styling */
         .justified-text {
             text-align: justify;
         }
-
-        /* Center the results table */
         .results-table {
             margin-left: auto;
             margin-right: auto;
         }
     </style>
 """, unsafe_allow_html=True)
-
 
 
 st.title("DxVar")
