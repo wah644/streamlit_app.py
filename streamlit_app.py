@@ -88,7 +88,7 @@ def snp_to_vcf(snp_value):
         # Extracting data
         chr_num = data[3][0][1]       # Chromosome number
         pos = int(data[3][0][2]) + 1  # Adjusting position (if 0-based, add 1)
-        alleles = data[3][0][3]       # Alleles
+        alleles = data[3][0][3].split(', ')       # Alleles
         
         # Print results
         st.write("Chromosome:", chr_num)
@@ -255,7 +255,6 @@ if user_input != st.session_state.last_input:
         snp_variant = snp_to_vcf(snp_id)
         
         if snp_variant:
-            st.success(f"Found alleles for {snp_id}: {', '.join(alleles)}")
             selected_allele = st.selectbox("Select an allele:", alleles)
  
     # Parse the variant if present
