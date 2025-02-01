@@ -4,12 +4,7 @@ import requests
 from groq import Groq
 import pandas as pd
 
-disease_classification_dict = {"No diseases found"}
 parts = []
-disease_labels = ['No disease found']
-flag = False
-reply = ""
-
 
 # Set page configuration
 st.set_page_config(page_title="DxVar", layout="centered")
@@ -36,15 +31,12 @@ if "GeneBe_results" not in st.session_state:
     st.session_state.GeneBe_results = ['-','-','-','-','-','-','-','-']
 if "InterVar_results" not in st.session_state:
     st.session_state.InterVar_results = ['-','-','-','-']
-if "disease_labels" not in st.session_state:
-    st.session_state.disease_labels = ['No disease found']
 if "disease_classification_dict" not in st.session_state:
     st.session_state.disease_classification_dict = {"No diseases found"}
-if "parts" not in st.session_state:
-    st.session_state.parts = []
 if "flag" not in st.session_state:
     st.session_state.flag = False
-
+if "reply" not in st.session_state:
+    st.session_state.reply = ""
 
 # Define the initial system message
 initial_messages = [
@@ -71,8 +63,6 @@ df = pd.read_csv(file_url)
 #ALL FUNCTIONS
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
-    global disease_labels
-    global disease_classification_dict
             
         # Check if the gene symbol and HGNC ID columns exist in the data
     if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
@@ -83,7 +73,7 @@ def find_gene_match(gene_symbol, hgnc_id):
         if not matching_rows.empty:
             selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
             st.write(selected_columns.style.apply(highlight_classification, axis=1))
-            disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
+            st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
         else:
                     #st.write("No match found.")
             st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
@@ -195,15 +185,14 @@ def get_assistant_response(chat_history):
 
 # Function to parse variant information
 def get_variant_info(message):
-    global flag
     try:
         parts = message.split(',')
         if len(parts) == 5 and parts[1].isdigit():
-            flag = True
+            st.session_state.flag = True
             return parts
         else:
             #st.write("Message does not match a variant format, please try again by entering a genetic variant.")
-            flag = False
+            st.session_state.flag = False
             return []
     except Exception as e:
         st.write(f"Error while parsing variant: {e}")
@@ -224,7 +213,7 @@ if user_input != st.session_state.last_input:
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
     
-    if flag == True:
+    if st.session_state.flag == True:
 
         #ACMG
         #GENEBE API
@@ -309,18 +298,34 @@ if user_input != st.session_state.last_input:
         st.write("### ClinGen Gene-Disease Results")
         find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
         
-        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
-        reply = get_assistant_response_1(user_input_1)
+        user_input_1 = f"The following diseases were found to be linked to the gene in interest: {st.session_state.disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
+        st.session_state.reply = get_assistant_response_1(user_input_1)
         st.markdown(
                         f"""
                         <div class="justified-text">
-                            Assistant: {reply}
+                            Assistant: {st.session_state.reply}
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
-        
+else:
+    if session_state.GeneBe_results:
+        st.table(data)
+        st.write("### ClinGen Gene-Disease Results")
+        find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
+        st.markdown(
+                        f"""
+                        <div class="justified-text">
+                            Assistant: {st.session_state.reply}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+
+
+
         #FINAL CHATBOT
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
