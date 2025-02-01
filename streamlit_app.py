@@ -56,6 +56,8 @@ initial_messages = [
             "User input: chr6:160585140-T>G. You respond: 6,160585140,T,G,hg38. This response should be standalone with no extra texts. "
             "Remember bases can be multiple letters (e.g., chr6:160585140-T>GG). If the user has additional requests with the message "
             "including the variant (e.g., 'tell me about diseases linked with the variant: chr6:160585140-T>G'), "
+            "Remember, ref bases can simply be deleted (no alt base) and therefore the alt base value can be left blank. Example:"
+            "User input: chr6:160585140-T>. You respond: 6,160585140,T,,hg38. since T was deleted and not replaced with anything"
             "ask them to enter only the variant first. They can ask follow-up questions afterward. "
             "The user can enter the variant in any format, but it should be the variant alone with no follow-up questions."
             "If the user enters an rs value simply return the rs value, example:"
