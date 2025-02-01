@@ -285,7 +285,7 @@ if user_input != st.session_state.last_input:
                 st.session_state.InterVar_results[0] = results.get("Intervar", "Not Available")
                 st.session_state.InterVar_results[2] = results.get("Gene", "Not Available")
             except JSONDecodeError as E:
-                st.session_state.InterVar_results = ['-','-','-','-']
+                st.session_state.InterVar_results = ['-','','-','']
                 pass
 
                 # Find and display the matching rows
