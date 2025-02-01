@@ -3,7 +3,7 @@ import streamlit as st
 import requests
 from groq import Groq
 import pandas as pd
-from bs4 import BeautifulSoup
+
 
 parts = []
 
@@ -71,24 +71,6 @@ df = pd.read_csv(file_url)
 
 
 #ALL FUNCTIONS
-
-def fetch_alleles(snp_id):
-    url = f"https://www.ncbi.nlm.nih.gov/snp/{snp_id}"
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Find the allele section
-        allele_section = soup.find(string="Alleles")
-        if allele_section:
-            parent_element = allele_section.find_parent()
-            if parent_element:
-                allele_text = parent_element.find_next_sibling().text
-                alleles = [allele.strip() for allele in allele_text.split('/') if allele.strip()]
-                return alleles
-    return None
-
 
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
