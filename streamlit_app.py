@@ -75,8 +75,9 @@ def find_gene_match(gene_symbol, hgnc_id):
         matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 
         if not matching_rows.empty:
-            selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']].set_index('DISEASE LABEL')
             st.write(selected_columns.style.apply(highlight_classification, axis=1))
+            
             st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
         else:
                     #st.write("No match found.")
