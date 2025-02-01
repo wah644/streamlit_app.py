@@ -17,7 +17,7 @@ st.markdown("""
             text-align: justify;
         }
         .results-table {
-            max-width: 1000px
+            max-width: 850px
             margin-left: auto;
             margin-right: auto;
         }
