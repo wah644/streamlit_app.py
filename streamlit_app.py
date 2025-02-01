@@ -113,10 +113,9 @@ def snp_to_vcf(snp_value):
         st.write("Alleles:", alleles)
         formatted_alleles = [f"chr{chr_num}:{pos}-{a.replace('/', '>')}" for a in alleles]
 
-        return data
     else:
         # Handle any errors if the request fails
-        return f"Error: {response.status_code}, {response.text}"
+        st.write(f"Error: {response.status_code}, {response.text}")
 
         # Function to find matching gene symbol and HGNC ID
 def find_gene_match(gene_symbol, hgnc_id):
@@ -264,18 +263,18 @@ if user_input != st.session_state.last_input:
     # Get assistant's response
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
-    st.write(f"Assistant: {assistant_response}")
     
     if user_input.lower().startswith("rs"):
-        snp_id = user_input.split()[0]  # Extract SNP ID (e.g., rs121913514)
-        
-        # Fetch alleles from NCBI
-        snp_variant = snp_to_vcf(snp_id)
-        selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-        assistant_response = convert_variant_format(selected_allele)
+        snp_id = user_input.split()[0]
+        snp_to_vcf(snp_id)
+        if len(formatted_alleles) > 1:
+            selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
+            assistant_response = convert_variant_format(selected_allele)
+        else:
+            assistant_response = convert_variant_format(formatted_alleles[0])
             
- 
     # Parse the variant if present
+    st.write(f"Assistant: {assistant_response}")
     parts = get_variant_info(assistant_response)
     
     if st.session_state.flag == True:
