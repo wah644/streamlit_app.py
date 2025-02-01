@@ -133,6 +133,7 @@ def find_gene_match(gene_symbol, hgnc_id):
         else:
                     #st.write("No match found.")
             st.markdown("<p style='color:red;'>No match found.</p>", unsafe_allow_html=True)
+            st.session_state.disease_classification_dict = dict('No diseases found')
     else:
         st.write("No existing gene-disease match found")
         
