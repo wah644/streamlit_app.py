@@ -8,7 +8,8 @@ parts = []
 
 # Set page configuration
 
-st.set_page_config(page_title="DxVar", layout="wide")
+# Set page configuration
+st.set_page_config(page_title="DxVar", layout="centered")
 
 st.markdown("""
     <style>
@@ -16,31 +17,13 @@ st.markdown("""
             text-align: justify;
         }
         .results-table {
+            max-width: 1000px
             margin-left: auto;
             margin-right: auto;
         }
-        .block-container {
-            max-width: 1000px;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-            margin: 0 auto;
-        }
-        /* Target the chat input specifically */
-        .stChatInput {
-            max-width: 1000px;
-            margin: auto;
-        }
-        /* Target the container of the chat input */
-        .stChatInput {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        [data-testid="stChatInput"] {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 st.title("DxVar")
