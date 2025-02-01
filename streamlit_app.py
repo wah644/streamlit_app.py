@@ -279,7 +279,7 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
             st.session_state.selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
             assistant_response = convert_variant_format(st.session_state.selected_option)
         else:
-            assistant_response = convert_variant_format(st.session_state.selected_option[0])
+            assistant_response = convert_variant_format(formatted_alleles[0])
     else:
         st.session_state.rs_val_flag = False
             
