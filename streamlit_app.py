@@ -293,6 +293,30 @@ if user_input != st.session_state.last_input:
                 "GeneBe Results": [st.session_state.GeneBe_results[0], st.session_state.GeneBe_results[1], st.session_state.GeneBe_results[2], st.session_state.GeneBe_results[3], st.session_state.GeneBe_results[4], st.session_state.GeneBe_results[5], st.session_state.GeneBe_results[6], st.session_state.GeneBe_results[7]],
                 "InterVar Results": [st.session_state.InterVar_results[0], st.session_state.InterVar_results[1], st.session_state.InterVar_results[2], st.session_state.InterVar_results[3]],
                             }
+
+
+
+        # Create DataFrame from your dictionary
+        comparison_df = pd.DataFrame(data)
+        
+        # Transpose the DataFrame to get attributes as columns
+        comparison_transposed = comparison_df.transpose()
+        # Set the first row as column headers
+        comparison_transposed.columns = comparison_transposed.iloc[0]
+        # Remove the first row (now that it's the header)
+        comparison_transposed = comparison_transposed.iloc[1:]
+        
+        # Define the styling function
+        def highlight_differences(row):
+            # Initialize an empty style series
+            styles = ['' for _ in range(len(row))]
+            
+            # Create a style with background color
+            return styles
+        
+        # Display the styled table
+        st.write(comparison_transposed.style.apply(highlight_differences, axis=1))
+
         st.table(data)
         
         
