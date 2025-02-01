@@ -310,7 +310,7 @@ if user_input != st.session_state.last_input:
                     )
 
 else:
-    if session_state.GeneBe_results:
+    if st.session_state.GeneBe_results:
         st.table(data)
         st.write("### ClinGen Gene-Disease Results")
         find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
