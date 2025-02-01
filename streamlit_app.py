@@ -75,8 +75,14 @@ def find_gene_match(gene_symbol, hgnc_id):
         matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
                 
         if not matching_rows.empty:
-            selected_columns = matching_rows[['DISEASE LABEL', 'MOI','CLASSIFICATION', 'DISEASE ID (MONDO)']]
-            st.write(selected_columns.style.apply(highlight_classification, axis=1))
+            # Set 'DISEASE LABEL' as the index
+            selected_columns = matching_rows[['DISEASE LABEL', 'MOI', 'CLASSIFICATION', 'DISEASE ID (MONDO)']].set_index('DISEASE LABEL')
+            
+            # Apply the styling function
+            styled_table = selected_columns.style.apply(highlight_classification, axis=1)
+            
+            # Display the table with scrolling
+            st.dataframe(styled_table, use_container_width=True)
             
             st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
         else:
