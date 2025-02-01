@@ -7,6 +7,7 @@ import pandas as pd
 
 parts = []
 alleles = []
+formatted_alleles =[]
 # Set page configuration
 
 # Set page configuration
@@ -73,6 +74,7 @@ df = pd.read_csv(file_url)
 #ALL FUNCTIONS
 def snp_to_vcf(snp_value):
     global alleles
+    global formatted_alleles
     url = "https://clinicaltables.nlm.nih.gov/api/snps/v3/search"
     params = {
         "df": "rsNum,38.chr,38.pos,38.alleles,38.gene",
@@ -94,6 +96,7 @@ def snp_to_vcf(snp_value):
         st.write("Chromosome:", chr_num)
         st.write("Position:", pos)
         st.write("Alleles:", alleles)
+        formatted_alleles = [f"chr{chr_num}:{pos}-{a.replace('/', '>')}" for a in alleles]
 
         return data
     else:
@@ -255,7 +258,7 @@ if user_input != st.session_state.last_input:
         snp_variant = snp_to_vcf(snp_id)
         
         if snp_variant:
-            selected_allele = st.selectbox("Select an allele:", alleles)
+            selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
  
     # Parse the variant if present
     parts = get_variant_info(assistant_response)
