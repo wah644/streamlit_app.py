@@ -256,11 +256,9 @@ if user_input != st.session_state.last_input:
         
         # Fetch alleles from NCBI
         snp_variant = snp_to_vcf(snp_id)
-        
-        if snp_variant:
-            selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-            assistant_response = get_assistant_response_initial(user_input)
-            st.write(f"Assistant: {assistant_response}")
+        selected_allele = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
+        assistant_response = get_assistant_response_initial(user_input)
+        st.write(f"Assistant: {assistant_response}")
             
  
     # Parse the variant if present
