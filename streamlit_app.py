@@ -8,7 +8,7 @@ parts = []
 
 # Set page configuration
 
-st.set_page_config(page_title="DxVar", layout="wide")  # Changed from "centered" to "wide"
+st.set_page_config(page_title="DxVar", layout="wide")
 
 st.markdown("""
     <style>
@@ -20,14 +20,22 @@ st.markdown("""
             margin-right: auto;
         }
         .block-container {
-            max-width: 1000px;  # Adjust this value to your preferred width
+            max-width: 1000px;
             padding-top: 2rem;
             padding-bottom: 2rem;
             margin: 0 auto;
         }
+        .stTextInput, .stTextArea {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        /* This will affect the chat input container */
+        .stChatInputContainer {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
     </style>
 """, unsafe_allow_html=True)
-
 st.title("DxVar")
 
 # Initialize Groq API client
