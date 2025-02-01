@@ -299,8 +299,10 @@ if user_input != st.session_state.last_input:
         # Create DataFrame from your dictionary
         acmg_results = pd.DataFrame(data)
         acmg_results.set_index("Attribute", inplace=True)
+        st.dataframe(acmg_results, use_container_width=True)
         # Display the styled table
-        st.write(acmg_results)
+        #st.write(acmg_results)
+        
 
         
         
@@ -333,7 +335,8 @@ else:
         acmg_results = pd.DataFrame(data)
         acmg_results.set_index("Attribute", inplace=True)
         # Display the styled table
-        st.write(acmg_results)
+        st.dataframe(acmg_results, use_container_width=True)
+        #st.write(acmg_results)
         st.write("### ClinGen Gene-Disease Results")
         find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
         st.markdown(
