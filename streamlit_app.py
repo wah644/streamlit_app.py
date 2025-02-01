@@ -13,7 +13,7 @@ st.markdown("""
     <style>
         /* Expands the main content area */
         .main .block-container {
-            max-width: 50%;  /* Adjust width as needed */
+            max-width: 25%;  /* Adjust width as needed */
             padding-left: 2rem;
             padding-right: 2rem;
         }
