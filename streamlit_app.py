@@ -13,13 +13,11 @@ st.set_page_config(page_title="DxVar", layout="centered")
 
 st.markdown("""
     <style>
-        .justified-text {
-            text-align: justify;
-        }
-        .results-table {
-            max-width: 850px
-            margin-left: auto;
-            margin-right: auto;
+        .main > div {
+            max-width: 1200px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            margin: auto;
         }
     </style>
 """, unsafe_allow_html=True)
