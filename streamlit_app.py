@@ -311,7 +311,7 @@ if user_input != st.session_state.last_input:
                     )
 
 else:
-    if st.session_state.GeneBe_results:
+    if any(st.session_state.GeneBe_results):
         result_color = get_color(st.session_state.GeneBe_results[0])
         st.markdown(f"### ACMG Results: <span style='color:{result_color}'>{st.session_state.GeneBe_results[0]}</span>", unsafe_allow_html=True)
         data = {
