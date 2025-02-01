@@ -6,7 +6,7 @@ import pandas as pd
 
 
 parts = []
-
+alleles = []
 # Set page configuration
 
 # Set page configuration
@@ -72,6 +72,7 @@ df = pd.read_csv(file_url)
 
 #ALL FUNCTIONS
 def snp_to_vcf(snp_value):
+    global alleles
     url = "https://clinicaltables.nlm.nih.gov/api/snps/v3/search"
     params = {
         "df": "rsNum,38.chr,38.pos,38.alleles,38.gene",
