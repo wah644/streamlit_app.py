@@ -30,7 +30,7 @@ st.markdown("""
             margin: 0 auto;
         }
         /* This will affect the chat input container */
-        .stChatInputContainer {
+        .stChatInput {
             max-width: 1000px;
             margin: 0 auto;
         }
