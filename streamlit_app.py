@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 from groq import Groq
 import pandas as pd
+from bs4 import BeautifulSou
 
 parts = []
 
