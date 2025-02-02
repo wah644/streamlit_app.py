@@ -41,14 +41,13 @@ if "disease_classification_dict" not in st.session_state:
     st.session_state.disease_classification_dict = {"No diseases found"}
 if "flag" not in st.session_state:
     st.session_state.flag = False
+if "rs_val_flag" not in st.session_state:
+    st.session_state.rs_val_flag = False
 if "reply" not in st.session_state:
     st.session_state.reply = ""
 if "selected_option" not in st.session_state:
     st.session_state.selected_option = None
-if "last_input" not in st.session_state:
-    st.session_state.last_input = ""
-if "last_input_allele_select" not in st.session_state:
-    st.session_state.last_input_allele_select = ""
+    
 # Define the initial system message
 initial_messages = [
     {
@@ -256,39 +255,30 @@ def get_variant_info(message):
         return []
 
 # Main Streamlit interaction loop
-
+if "last_input" not in st.session_state:
+    st.session_state.last_input = ""
+    
 user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
 
-if user_input and (user_input != st.session_state.last_input or st.session_state.selected_option != st.session_state.last_input_allele_select):
-    # Store input in session state
-    st.session_state.last_input = user_input
-
+if user_input != st.session_state.last_input or st.session_state.rs_val_flag == True:
     # Get assistant's response
+    st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
-
+    
     if user_input.lower().startswith("rs"):
+        st.session_state.rs_val_flag = True
         snp_id = user_input.split()[0]
-        formatted_alleles = snp_to_vcf(snp_id)  # Ensure this function returns a valid list
-
-        if formatted_alleles:  # Check if alleles exist
-            if len(formatted_alleles) > 1:
-                selected_option = st.selectbox(
-                    "Your query results in several genomic alleles, please select one:", formatted_alleles
-                )
-            else:
-                selected_option = formatted_alleles[0]
-
-            # Store selection in session state
-            st.session_state.selected_option = selected_option
-            st.session_state.last_input_allele_select = selected_option
-
-            # Convert the selected allele format
-            assistant_response = convert_variant_format(selected_option)
-
-    # Display assistant response
-    st.write(f"Assistant: {assistant_response}")
-
+        snp_to_vcf(snp_id)
+        if len(formatted_alleles) > 1:
+            st.session_state.selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
+            assistant_response = convert_variant_format(st.session_state.selected_option)
+        else:
+            assistant_response = convert_variant_format(formatted_alleles[0])
+    else:
+        st.session_state.rs_val_flag = False
+            
     # Parse the variant if present
+    st.write(f"Assistant: {assistant_response}")
     parts = get_variant_info(assistant_response)
     
     if st.session_state.flag == True:
