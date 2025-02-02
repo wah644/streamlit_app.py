@@ -257,7 +257,8 @@ def get_variant_info(message):
 
 # Main Streamlit interaction loop
 
-    
+user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
+
 if user_input and (user_input != st.session_state.last_input or st.session_state.selected_option != st.session_state.last_input_allele_select):
     # Store input in session state
     st.session_state.last_input = user_input
