@@ -267,16 +267,16 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
     assistant_response = get_assistant_response_initial(user_input)
     
     if user_input.lower().startswith("rs"):
-        st.session_state.rs_val_flag = True
         snp_id = user_input.split()[0]
         snp_to_vcf(snp_id)
         if len(formatted_alleles) > 1:
+            st.session_state.rs_val_flag = True
             option_box = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
             assistant_response = convert_variant_format(option_box)
         else:
+            st.session_state.rs_val_flag = False
             assistant_response = convert_variant_format(formatted_alleles[0])
-    else:
-        st.session_state.rs_val_flag = False
+        
             
     # Parse the variant if present
     st.write(f"Assistant: {assistant_response}")
