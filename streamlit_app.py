@@ -367,6 +367,7 @@ if st.session_state.flag == True:
     st.dataframe(acmg_results, use_container_width=True)
     #st.write(acmg_results)
     st.write("### ClinGen Gene-Disease Results")
+    find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
     st.markdown(
                     f"""
                     <div class="justified-text">
