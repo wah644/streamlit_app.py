@@ -270,8 +270,8 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
         snp_id = user_input.split()[0]
         snp_to_vcf(snp_id)
         if len(formatted_alleles) > 1:
-            st.session_state.selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-            assistant_response = convert_variant_format(st.session_state.selected_option)
+            option_box = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
+            assistant_response = convert_variant_format(option_box)
         else:
             assistant_response = convert_variant_format(formatted_alleles[0])
     else:
@@ -280,9 +280,10 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
     # Parse the variant if present
     st.write(f"Assistant: {assistant_response}")
     parts = get_variant_info(assistant_response)
-    
-    if st.session_state.flag == True:
 
+    
+    if st.session_state.flag == True and option_box != st.session_state.selected_option:
+        st.session_state.selected_option = option_box
         #ACMG
         #GENEBE API
         # Define the API URL and parameters
