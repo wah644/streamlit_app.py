@@ -283,7 +283,7 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
     parts = get_variant_info(assistant_response)
 
     
-    if st.session_state.flag == True and option_box != st.session_state.selected_option:
+    if st.session_state.flag == True and (st.session_state.rs_val_flag == False or option_box != st.session_state.selected_option):
         st.session_state.selected_option = option_box
         #ACMG
         #GENEBE API
