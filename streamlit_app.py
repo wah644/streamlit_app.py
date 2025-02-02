@@ -259,6 +259,7 @@ if "last_input" not in st.session_state:
     st.session_state.last_input = ""
     
 user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
+option_box = ""
 
 if user_input != st.session_state.last_input or st.session_state.rs_val_flag == True:
     # Get assistant's response
