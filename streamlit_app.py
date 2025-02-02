@@ -347,7 +347,7 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
                 st.session_state.InterVar_results = ['-','','-','']
                 pass
 
-
+        find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
         user_input_1 = f"The following diseases were found to be linked to the gene in interest: {st.session_state.disease_classification_dict}. Explain these diseases in depth, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found "
         st.session_state.reply = get_assistant_response_1(user_input_1)
 
@@ -367,7 +367,6 @@ if st.session_state.flag == True:
     st.dataframe(acmg_results, use_container_width=True)
     #st.write(acmg_results)
     st.write("### ClinGen Gene-Disease Results")
-    find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
     st.markdown(
                     f"""
                     <div class="justified-text">
