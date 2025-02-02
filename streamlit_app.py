@@ -258,16 +258,11 @@ def get_variant_info(message):
 # Main Streamlit interaction loop
 
     
-user_input = st.text_input("Enter a genetic variant (ex: chr6:160585140-T>G)")
+if user_input and (user_input != st.session_state.last_input or st.session_state.selected_option != st.session_state.last_input_allele_select):
+    # Store input in session state
+    st.session_state.last_input = user_input
 
-if user_input != st.session_state.last_input or st.session_state.selected_option != st.session_state.last_input_allele_select:
     # Get assistant's response
-    st.session_state.last_input = user_input
-    assistant_response = get_assistant_response_initial(user_input)
-    
-    if user_input != st.session_state.last_input:
-    # Get assistant's response
-    st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
 
     if user_input.lower().startswith("rs"):
@@ -276,19 +271,23 @@ if user_input != st.session_state.last_input or st.session_state.selected_option
 
         if formatted_alleles:  # Check if alleles exist
             if len(formatted_alleles) > 1:
-                selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-                st.session_state.selected_option = selected_option
+                selected_option = st.selectbox(
+                    "Your query results in several genomic alleles, please select one:", formatted_alleles
+                )
             else:
                 selected_option = formatted_alleles[0]
-                st.session_state.selected_option = selected_option
-            
+
+            # Store selection in session state
+            st.session_state.selected_option = selected_option
             st.session_state.last_input_allele_select = selected_option
+
+            # Convert the selected allele format
             assistant_response = convert_variant_format(selected_option)
 
- 
-            
-    # Parse the variant if present
+    # Display assistant response
     st.write(f"Assistant: {assistant_response}")
+
+    # Parse the variant if present
     parts = get_variant_info(assistant_response)
     
     if st.session_state.flag == True:
