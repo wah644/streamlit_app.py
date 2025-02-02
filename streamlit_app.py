@@ -265,16 +265,26 @@ if user_input != st.session_state.last_input or st.session_state.selected_option
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
     
+    if user_input != st.session_state.last_input:
+    # Get assistant's response
+    st.session_state.last_input = user_input
+    assistant_response = get_assistant_response_initial(user_input)
+
     if user_input.lower().startswith("rs"):
         snp_id = user_input.split()[0]
-        snp_to_vcf(snp_id)
-        if len(formatted_alleles) > 1:
-            st.session_state.selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
-            st.session_state.last_input_allele_select = st.session_state.selected_option
-            assistant_response = convert_variant_format(st.session_state.selected_option)
-        else:
-            st.session_state.last_input_allele_select = formatted_alleles[0]
-            assistant_response = convert_variant_format(formatted_alleles[0])
+        formatted_alleles = snp_to_vcf(snp_id)  # Ensure this function returns a valid list
+
+        if formatted_alleles:  # Check if alleles exist
+            if len(formatted_alleles) > 1:
+                selected_option = st.selectbox("Your query results in several genomic alleles, please select one:", formatted_alleles)
+                st.session_state.selected_option = selected_option
+            else:
+                selected_option = formatted_alleles[0]
+                st.session_state.selected_option = selected_option
+            
+            st.session_state.last_input_allele_select = selected_option
+            assistant_response = convert_variant_format(selected_option)
+
  
             
     # Parse the variant if present
