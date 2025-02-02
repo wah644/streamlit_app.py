@@ -118,7 +118,7 @@ def snp_to_vcf(snp_value):
         st.write(f"Error: {response.status_code}, {response.text}")
 
         # Function to find matching gene symbol and HGNC ID
-def find_gene_match(gene_symbol, hgnc_id):
+def draw_gene_match_table(gene_symbol, hgnc_id):
         # Check if the gene symbol and HGNC ID columns exist in the data
     if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
                 # Filter rows matching the gene symbol and HGNC ID
@@ -129,6 +129,14 @@ def find_gene_match(gene_symbol, hgnc_id):
             styled_table = selected_columns.style.apply(highlight_classification, axis=1)
             # Display the table with scrolling
             st.dataframe(styled_table, use_container_width=True)
+
+
+def find_gene_match(gene_symbol, hgnc_id):
+        # Check if the gene symbol and HGNC ID columns exist in the data
+    if 'GENE SYMBOL' in df.columns and 'GENE ID (HGNC)' in df.columns:
+                # Filter rows matching the gene symbol and HGNC ID
+        matching_rows = df[(df['GENE SYMBOL'] == gene_symbol) & (df['GENE ID (HGNC)'] == hgnc_id)]
+        if not matching_rows.empty:
             st.session_state.disease_classification_dict = dict(zip(matching_rows['DISEASE LABEL'], matching_rows['CLASSIFICATION']))
         else:
                     #st.write("No match found.")
@@ -136,7 +144,6 @@ def find_gene_match(gene_symbol, hgnc_id):
             st.session_state.disease_classification_dict = "No disease found"
     else:
         st.write("No existing gene-disease match found")
-        
 
 def get_color(result):
     if result == "Pathogenic":
@@ -367,7 +374,7 @@ if st.session_state.flag == True:
     st.dataframe(acmg_results, use_container_width=True)
     #st.write(acmg_results)
     st.write("### ClinGen Gene-Disease Results")
-    find_gene_match(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
+    draw_gene_match_table(st.session_state.GeneBe_results[2], 'HGNC:'+str(st.session_state.GeneBe_results[3]))
     st.markdown(
                     f"""
                     <div class="justified-text">
