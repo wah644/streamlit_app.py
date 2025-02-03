@@ -323,8 +323,7 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
             st.session_state.rs_val_flag = False
             if len(formatted_alleles) == 1:
                 assistant_response = convert_variant_format(formatted_alleles[0])
-            else:
-                st.write("Invalid rs value entered. Please try again.!!")
+                
         
             
     # Parse the variant if present
