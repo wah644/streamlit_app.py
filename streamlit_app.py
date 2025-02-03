@@ -68,9 +68,13 @@ initial_messages = [
             "The user can enter the variant in any format, but it should be the variant alone with no follow-up questions."
             "If the user enters an rs value simply return the rs value, example:"
             "User input: tell me about rs1234. You respond: rs1234"
+            "Always respond in the above format (ie: no space between the letters rs and the number. Example:)"
+            "User input: rs 5689. You respond: rs5689"
             "if both rs and chromosome,position,ref base,alt base are given, give priority to the chromosome, position,ref base,alt base"
             "and only return that, however if any info is missing from chromosome,position,ref base,alt base, just use rs value and return rs"
             "Example: rs124234 chromosome:3, pos:13423. You reply: rs124234. since the ref base and alt base are missing"
+            "Ensure that any rs value provided is valid; it must be in the format 'rs' followed by a positive integer greater than zero. "
+            "If the rs value is invalid (e.g., 'rs' or 'rs0'), do not return a random rs id; instead, ask the user to provide a valid rs value."
         ),
     }
 ]
