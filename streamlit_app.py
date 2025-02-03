@@ -67,7 +67,7 @@ initial_messages = [
             "ask them to enter only the variant first. They can ask follow-up questions afterward. "
             "The user can enter the variant in any format, but it should be the variant alone with no follow-up questions."
             "If the user enters an rs value simply return the rs value, example:"
-            "User input: tell me about rs1234. You respond: rs1234"
+            "User input: tell me about rs12345. You respond: rs12345"
             "Always respond in the above format (ie: no space between the letters rs and the number. Example:)"
             "User input: rs 5689. You respond: rs5689"
             "if both rs and chromosome,position,ref base,alt base are given, give priority to the chromosome, position,ref base,alt base"
