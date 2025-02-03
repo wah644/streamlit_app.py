@@ -314,8 +314,8 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
     st.session_state.last_input = user_input
     assistant_response = get_assistant_response_initial(user_input)
     
-    if user_input.lower().startswith("rs"):
-        snp_id = user_input.split()[0]
+    if assistant_response.lower().startswith("rs"):
+        snp_id = assistant_response.split()[0]
         snp_to_vcf(snp_id)
         if len(formatted_alleles) > 1:
             st.session_state.rs_val_flag = True
