@@ -321,7 +321,7 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
             assistant_response = convert_variant_format(option_box)
         else:
             st.session_state.rs_val_flag = False
-            if en(formatted_alleles) == 1:
+            if len(formatted_alleles) == 1:
                 assistant_response = convert_variant_format(formatted_alleles[0])
             else:
                 st.write("Invalid rs value entered. Please try again.!!")
