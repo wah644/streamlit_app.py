@@ -123,19 +123,18 @@ def snp_to_vcf(snp_value):
     
     # Check if the response is successful
     if response.status_code == 200:
-      try:
-        data = response.json()
-        filtered_data = data["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
+        try:
+            data = response.json()
+            filtered_data = data["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
+            
+            for allele in filtered_data[1:]:
+                new_format = convert_format(allele["hgvs"])
+                if new_format != "Invalid format":
+                    formatted_alleles.append(new_format)
 
-        for allele in filtered_data[1:]:
-          new_format = convert_format(allele["hgvs"])
-          if new_format != "Invalid format":
-            formatted_alleles.append(new_format)
-
-      except JSONDecodeError as E:
-        st.write("Invalid rs value entered. Please try again.")
-   
-
+        except JSONDecodeError as E:
+            st.write("Invalid rs value entered. Please try again.")
+    
     else:
         # Handle any errors if the request fails
         st.write(f"Error: {response.status_code}, {response.text}")
@@ -322,7 +321,10 @@ if user_input != st.session_state.last_input or st.session_state.rs_val_flag == 
             assistant_response = convert_variant_format(option_box)
         else:
             st.session_state.rs_val_flag = False
-            assistant_response = convert_variant_format(formatted_alleles[0])
+            if en(formatted_alleles) == 1::
+                assistant_response = convert_variant_format(formatted_alleles[0])
+            else:
+                st.write("Invalid rs value entered. Please try again.!!")
         
             
     # Parse the variant if present
