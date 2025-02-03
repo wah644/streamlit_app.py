@@ -80,19 +80,15 @@ df = pd.read_csv(file_url)
 
 
 #ALL FUNCTIONS
-def convert_format(snp_string):
-    # Regular expression to capture the parts of the input string
-    match = re.match(r"NC_000(\d+)\.\d+:g\.(\d+)([A-Za-z])>([A-Za-z])", snp_string)
-    
+def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
+    # Extract chromosome number from seq_id (e.g., "NC_000022.11" -> 22)
+    match = re.match(r"NC_000(\d+)\.\d+", seq_id)
+
     if match:
-        # Extract the chromosome number, position, and alleles
-        chromosome = int(match.group(1)) # Extracts the chromosome number (e.g., '7')
-        position = match.group(2)  # Extracts the position (e.g., '24926827')
-        ref_allele = match.group(3)  # Extracts the reference allele (e.g., 'C')
-        alt_allele = match.group(4)  # Extracts the alternate allele (e.g., 'A')
+        chromosome = int(match.group(1))  # Extracts the chromosome number (e.g., '22')
 
         # Return the desired format
-        return f"chr{chromosome}:{position}-{ref_allele}>{alt_allele}"
+        return f"chr{chromosome}:{position}-{deleted_sequence}>{inserted_sequence}"
     else:
         return "Invalid format"
 
@@ -126,14 +122,16 @@ def snp_to_vcf(snp_value):
         try:
             data = response.json()
             filtered_data = data["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
-            
+    
             for allele in filtered_data[1:]:
-                new_format = convert_format(allele["hgvs"])
-                if new_format != "Invalid format":
-                    formatted_alleles.append(new_format)
+              vcf_format = allele["allele"]["spdi"]
+              new_format = convert_format(vcf_format["seq_id"],vcf_format["position"],vcf_format["deleted_sequence"],vcf_format["inserted_sequence"] )
+              if new_format != "Invalid format":
+                formatted_alleles.append(new_format)
+    
+          except JSONDecodeError as E:
+            st.write ("Invalid rs value entered. Please try again.")
 
-        except JSONDecodeError as E:
-            st.write("Invalid rs value entered. Please try again.")
     
     else:
         # Handle any errors if the request fails
