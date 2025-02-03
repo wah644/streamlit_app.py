@@ -125,7 +125,7 @@ def snp_to_vcf(snp_value):
     
             for allele in filtered_data[1:]:
                 vcf_format = allele["allele"]["spdi"]
-                new_format = convert_format(vcf_format["seq_id"],vcf_format["position"],vcf_format["deleted_sequence"],vcf_format["inserted_sequence"] )
+                new_format = convert_format(vcf_format["seq_id"],vcf_format["position"]+1,vcf_format["deleted_sequence"],vcf_format["inserted_sequence"] )
                 if new_format != "Invalid format":
                     formatted_alleles.append(new_format)
     
