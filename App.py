@@ -673,7 +673,7 @@ phenotypes = [p.strip() for p in user_input_ph.split('\n') if p.strip()]
 # Limit to 5 phenotypes
 phenotypes = phenotypes[:5]
 
-if (user_input != st.session_state.last_input or user_input_ph != st.session_state.last_input_ph):
+if (user_input != st.session_state.last_input or phenotypes != st.session_state.last_input_ph):
     # Reset data when input changes
     st.session_state.last_input = user_input
     st.session_state.last_input_ph = phenotypes
