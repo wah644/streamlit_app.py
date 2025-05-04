@@ -172,6 +172,12 @@ if language == "Arabic":
 
 
 #ALL FUNCTIONS
+
+def on_variant_select():
+    # This function intentionally left empty - it's just to capture the callback
+    pass
+
+
 def scrape_papers_for_variant(variant_index, phenotypes, output_filepath=None):
     """Scrape papers for a specific variant with multiple phenotypes"""
     if output_filepath is None:
@@ -776,11 +782,20 @@ if st.session_state.variant_count > 0:
         # Make sure the selected_variant_index is in bounds
         if "selected_variant_index" not in st.session_state or st.session_state.selected_variant_index >= len(variant_options):
             st.session_state.selected_variant_index = 0
-            
-        selected_variant = st.selectbox("Select variant to view:", variant_options, index=st.session_state.selected_variant_index)
-        st.session_state.selected_variant_index = variant_options.index(selected_variant)
         
-        # Rest of your code...
+        # Use the key parameter to track changes without triggering reruns
+        selected_variant = st.selectbox(
+            "Select variant to view:", 
+            variant_options, 
+            index=st.session_state.selected_variant_index,
+            key="variant_selector",
+            on_change=on_variant_select
+        )
+        
+        # Update the index in session state
+        if "variant_selector" in st.session_state:
+            st.session_state.selected_variant_index = variant_options.index(st.session_state.variant_selector)
+        
     else:
         st.error("No valid variants were found. Please check your input and try again.")
     
