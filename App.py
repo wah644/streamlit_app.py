@@ -811,8 +811,6 @@ if st.session_state.variant_count > 0:
         # Rest of your code...
     else:
         st.error("No valid variants were found. Please check your input and try again.")
-    selected_variant = st.selectbox("Select variant to view:", variant_options, index=st.session_state.selected_variant_index)
-    st.session_state.selected_variant_index = variant_options.index(selected_variant)
     
     # If there are multiple variants and phenotypes are provided, show ranking button
     if st.session_state.variant_count > 1 and phenotypes:
