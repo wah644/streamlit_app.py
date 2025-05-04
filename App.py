@@ -125,8 +125,7 @@ if "all_variants_formatted" not in st.session_state:
     st.session_state.all_variants_formatted = []
 if "phenotype_paper_matches" not in st.session_state:
     st.session_state.phenotype_paper_matches = {}
-if "selected_variant_index" not in st.session_state:
-    st.session_state.selected_variant_index = 0
+
     
 #read gene-disease-curation file
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
@@ -948,7 +947,7 @@ if st.session_state.variant_count > 0:
                         hgnc_id = 'HGNC:'+str(st.session_state.GeneBe_results[idx][3])
                         disease_dict = find_gene_match(gene_symbol, hgnc_id)
                         
-                        user_input_1 = f"""The following diseases were found to be linked to the gene in interest: {disease_dict}. 
+                        _1 = f"""The following diseases were found to be linked to the gene in interest: {disease_dict}. 
                         Explain these diseases, announce if a disease has been refuted, no need to explain that disease. If no diseases found reply with: No linked diseases found based on the ClinGen Gene-Disease database. 
                         
                         The following papers were found to be linked with the requested variant and the phenotypes of interest ({', '.join(phenotypes)}): {filtered_papers}. 
@@ -963,7 +962,7 @@ if st.session_state.variant_count > 0:
                         Conclude with an overall assessment of the variant's relationship to the specified phenotypes."""
                         
                         try:
-                            ai_summary = get_assistant_response_1(user_input_1)
+                            ai_summary = get_assistant_response_1(_1)
                             st.write("### AI Summary")
                             st.markdown(
                                 f"""
