@@ -908,7 +908,7 @@ if st.session_state.variant_count > 0:
                 if idx in st.session_state.phenotype_paper_matches:
                     phenotype_papers = st.session_state.phenotype_paper_matches[idx]
                     for phenotype, papers in phenotype_papers.items():
-                        st.write(f"#### Papers mentioning phenotype: {phenotype} ({len(papers)} papers)")
+                        st.write(f"#### {phenotype} ({len(papers)} papers)")
                         
                         if papers:
                             papers_df = pd.DataFrame(papers)
