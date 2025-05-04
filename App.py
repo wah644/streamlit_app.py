@@ -119,8 +119,6 @@ if "variant_pmids" not in st.session_state:
     st.session_state.variant_pmids = []
 if "selected_variant_index" not in st.session_state:
     st.session_state.selected_variant_index = 0
-if "variant_ranking" not in st.session_state:
-    st.session_state.variant_ranking = ""
 if "all_variants_formatted" not in st.session_state:
     st.session_state.all_variants_formatted = []
 if "phenotype_paper_matches" not in st.session_state:
@@ -688,7 +686,6 @@ if (user_input != st.session_state.last_input or user_input_ph != st.session_sta
     st.session_state.variant_papers = []
     st.session_state.variant_pmids = []
     st.session_state.all_variants_formatted = []
-    st.session_state.variant_ranking = ""
     st.session_state.variant_options = []
     st.session_state.phenotype_paper_matches = {}
     
@@ -771,6 +768,8 @@ if (user_input != st.session_state.last_input or user_input_ph != st.session_sta
             else:
                 st.session_state.variant_papers.append([])
                 st.session_state.phenotype_paper_matches[i] = {}
+
+#_______________________________________________________________________________________
 
 # Main interface for variant selection if multiple variants
 if st.session_state.variant_count > 0:
@@ -859,10 +858,6 @@ if st.session_state.variant_count > 0:
                     else:
                         st.error(f"Error generating summary: {e}")
 
-    # Display the ranking if available
-    if st.session_state.variant_ranking:
-        st.write("### Variant Ranking")
-        st.write(st.session_state.variant_ranking)
 
 # Display selected variant information
 if st.session_state.variant_count > 0:
