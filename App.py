@@ -650,9 +650,14 @@ else:
     user_input = st.text_area("أدخل المتغيرات الجينية (أدخل حتى 10 متغيرات، متغير واحد لكل سطر):", height=150)
 
 if language == "English":
-    user_input_ph = st.text_input("Enter a phenotype:")
+    user_input_ph = st.text_area("Enter up to 5 phenotypes (one per line):", height=150)
 else:
-    user_input_ph = st.text_input("أدخل النمط الظاهري:")
+    user_input_ph = st.text_area("أدخل حتى 5 أنماط ظاهرية (نمط واحد في كل سطر):", height=150)
+
+# Convert user input phenotypes to a list (one per line)
+phenotypes = [p.strip() for p in user_input_ph.split('\n') if p.strip()]
+# Limit to 5 phenotypes
+phenotypes = phenotypes[:5]
 
 if (user_input != st.session_state.last_input or user_input_ph != st.session_state.last_input_ph):
     # Reset data when input changes
