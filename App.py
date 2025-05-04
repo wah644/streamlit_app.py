@@ -528,35 +528,7 @@ def get_assistant_response_1(user_input):
 
     assistant_reply = completion.choices[0].message.content
     return assistant_reply
-
-# Function to rank the variants by pathogenicity
-def get_variant_ranking(variants_info, phenotypes):
-    # Construct message with all variants info
-    ranking_message = f"Please rank the following variants by their pathogenicity for the phenotypes '{', '.join(phenotypes)}':\n\n"
-    
-    for i, variant in enumerate(variants_info):
-        formatted_variant = st.session_state.all_variants_formatted[i] if i < len(st.session_state.all_variants_formatted) else "Unknown format"
-        acmg = variant["GeneBe_results"][0] if i < len(variants_info) and len(variant["GeneBe_results"]) > 0 else "Not Available"
-        gene = variant["GeneBe_results"][2] if i < len(variants_info) and len(variant["GeneBe_results"]) > 2 else "Not Available"
-        ranking_message += f"Variant {i+1}: {formatted_variant}\n"
-        ranking_message += f"ACMG Classification: {acmg}\n"
-        ranking_message += f"Gene: {gene}\n"
-        if "paper_count" in variant and variant["paper_count"] is not None:
-            ranking_message += f"Related papers: {variant['paper_count']}\n"
-        ranking_message += "\n"
-    
-    full_message = SYSTEM_RANKING + [{"role": "user", "content": ranking_message}]
-    completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=full_message,
-        temperature=temp_val,
-        max_completion_tokens=1024,
-        top_p=top_p_val,
-        stream=False,
-        stop=None,
-    )
-
-    return completion.choices[0].message.content    
+  
 
 # Function to interact with Groq API for assistant response
 def get_assistant_response(chat_history):
@@ -812,22 +784,6 @@ if st.session_state.variant_count > 0:
     else:
         st.error("No valid variants were found. Please check your input and try again.")
     
-    # If there are multiple variants and phenotypes are provided, show ranking button
-    if st.session_state.variant_count > 1 and phenotypes:
-        if st.button("Rank variants by pathogenicity for these phenotypes"):
-            with st.spinner("Ranking variants..."):
-                all_variants_data_for_ranking = []
-                for i in range(st.session_state.variant_count):
-                    variant_info = {
-                        "GeneBe_results": st.session_state.GeneBe_results[i],
-                        "paper_count": st.session_state.paper_count[i]
-                    }
-                    all_variants_data_for_ranking.append(variant_info)
-                
-                st.session_state.variant_ranking = get_variant_ranking(
-                    all_variants_data_for_ranking, 
-                    phenotypes
-                )
 
     # If there are variants and phenotypes, show overall summary button
     if st.session_state.variant_count > 0 and phenotypes:
