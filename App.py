@@ -286,14 +286,14 @@ def convert_variant_format(variant: str) -> str:
 #API call to e-utils for a specific variant
 def snp_to_vcf(snp_id):
     global eutils_data
-    formatted_alleles.clear()
+    formatted_alleles = []
     
     try:
         url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
         params = {
             "db": "snp",
             "id": snp_id.replace("rs", ""),  # Remove 'rs' prefix if present
-            "rettype": "json",
+            "rettype": "chr",
             "retmode": "text",
             "api_key": eutils_api_key
         }
@@ -301,19 +301,50 @@ def snp_to_vcf(snp_id):
         
         if response.status_code == 200:
             try:
-                eutils_data = response.json()
-                if "primary_snapshot_data" in eutils_data and "placements_with_allele" in eutils_data["primary_snapshot_data"]:
-                    filtered_data = eutils_data["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
-            
-                    for allele in filtered_data[1:]:
-                        if "allele" in allele and "spdi" in allele["allele"]:
-                            vcf_format = allele["allele"]["spdi"]
-                            new_format = convert_format(vcf_format["seq_id"], vcf_format["position"]+1, vcf_format["deleted_sequence"], vcf_format["inserted_sequence"])
+                # Parse XML response
+                from xml.etree import ElementTree as ET
+                eutils_data = response.text
+                
+                # Parse the XML string
+                root = ET.fromstring(eutils_data)
+                
+                # Extract chromosome and position from CHRPOS
+                chrpos_element = root.find(".//CHRPOS")
+                if chrpos_element is not None and chrpos_element.text:
+                    chr_pos = chrpos_element.text.split(':')
+                    if len(chr_pos) == 2:
+                        chromosome = chr_pos[0]
+                        position = chr_pos[1]
+                    else:
+                        st.error(f"Invalid CHRPOS format for {snp_id}")
+                        return []
+                else:
+                    st.error(f"Could not find CHRPOS element for {snp_id}")
+                    return []
+                
+                # Extract reference and alternate alleles from SPDI
+                spdi_element = root.find(".//SPDI")
+                if spdi_element is not None and spdi_element.text:
+                    # SPDI format example: NC_000001.11:230710020:G:A,NC_000001.11:230710020:G:T
+                    spdi_values = spdi_element.text.split(',')
+                    
+                    for spdi in spdi_values:
+                        parts = spdi.split(':')
+                        if len(parts) == 4:
+                            seq_id = parts[0]
+                            pos = int(parts[1])
+                            ref = parts[2]
+                            alt = parts[3]
+                            
+                            # Use the same convert_format function as before
+                            new_format = convert_format(seq_id, pos+1, ref, alt)
                             if new_format != "Invalid format":
                                 formatted_alleles.append(new_format)
+                
                 return formatted_alleles
-            except JSONDecodeError:
-                st.error(f"Invalid rs value entered: {snp_id}. Please try again.")
+            
+            except Exception as e:
+                st.error(f"Error parsing data for {snp_id}: {str(e)}")
                 return []
         else:
             st.error(f"Error: {response.status_code}, Unable to fetch data for {snp_id}")
