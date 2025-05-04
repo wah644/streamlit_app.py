@@ -100,7 +100,7 @@ if "selected_option" not in st.session_state:
 if "last_input" not in st.session_state:
     st.session_state.last_input = ""
 if "last_input_ph" not in st.session_state:
-    st.session_state.last_input_ph = ""
+    st.session_state.last_input_ph = []
 if "hgvs_val" not in st.session_state:
     st.session_state.hgvs_val = []
 if "papers" not in st.session_state:
@@ -123,6 +123,8 @@ if "variant_ranking" not in st.session_state:
     st.session_state.variant_ranking = ""
 if "all_variants_formatted" not in st.session_state:
     st.session_state.all_variants_formatted = []
+if "phenotype_paper_matches" not in st.session_state:
+    st.session_state.phenotype_paper_matches = {}
 
 #read gene-disease-curation file
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
@@ -168,35 +170,63 @@ if language == "Arabic":
 
 
 #ALL FUNCTIONS
-def scrape_papers_for_variant(variant_index, output_filepath=None):
-    """Scrape papers for a specific variant"""
+def scrape_papers_for_variant(variant_index, phenotypes, output_filepath=None):
+    """Scrape papers for a specific variant with multiple phenotypes"""
     if output_filepath is None:
         output_filepath = f"papers_variant_{variant_index}.jsonl"
     
     # Clear the output file at the start
     open(output_filepath, "w").close()  
-    papers = []
-
+    
+    # Dictionary to store paper results for each phenotype
+    phenotype_papers = {}
+    
     pmids = st.session_state.variant_pmids[variant_index]
     
-    for i in range(0, len(pmids), chunk_size):
-        chunk = pmids[i:i+chunk_size]
-        chunk_query = [chunk, [st.session_state.last_input_ph]]
-        get_and_dump_pubmed_papers(chunk_query, output_filepath=temp_filepath)
+    # Process each phenotype
+    for phenotype in phenotypes:
+        if not phenotype.strip():  # Skip empty phenotypes
+            continue
+            
+        phenotype_papers[phenotype] = []
+        
+        # Process PMIDs in chunks
+        for i in range(0, len(pmids), chunk_size):
+            chunk = pmids[i:i+chunk_size]
+            temp_file = f"temp_chunk_{phenotype.replace(' ', '_')}.jsonl"
+            
+            # Query for this specific phenotype
+            chunk_query = [chunk, [phenotype]]
+            get_and_dump_pubmed_papers(chunk_query, output_filepath=temp_file)
 
-        # Read temp file and append to output file
-        with open(temp_filepath, "r", encoding="utf-8") as infile, open(output_filepath, "a", encoding="utf-8") as outfile:
-            outfile.write(infile.read())
-
-        # Load into array
-        with open(temp_filepath, "r", encoding="utf-8") as file:
-            for line in file:
-                papers.append(json.loads(line.strip()))
-
+            # Load temp file results
+            papers_for_phenotype = []
+            try:
+                with open(temp_file, "r", encoding="utf-8") as file:
+                    for line in file:
+                        paper = json.loads(line.strip())
+                        papers_for_phenotype.append(paper)
+                        
+                # Append to main output file
+                with open(output_filepath, "a", encoding="utf-8") as outfile:
+                    for paper in papers_for_phenotype:
+                        outfile.write(json.dumps(paper) + "\n")
+                
+                # Store papers for this phenotype
+                phenotype_papers[phenotype].extend(papers_for_phenotype)
+                
+            except Exception as e:
+                print(f"Error processing chunk for phenotype {phenotype}: {e}")
+            
+            # Clean up temporary file
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+    
+    # Clean up the main temporary file
     if os.path.exists(temp_filepath):
         os.remove(temp_filepath)
     
-    return papers
+    return phenotype_papers
 
 
 def get_pmids(rs_id):
@@ -413,7 +443,7 @@ SYSTEM_RANKING = [
         "content": (
             "You are a clinician assistant chatbot specializing in genomic research and variant analysis. "
             "Your task is to rank multiple genetic variants by their pathogenicity based on the provided ACMG classifications "
-            "and research papers linking them to a specific phenotype. Rank them from 1 (most pathogenic) to N (least pathogenic)."
+            "and research papers linking them to specific phenotypes. Rank them from 1 (most pathogenic) to N (least pathogenic)."
             "Provide clear reasoning for your ranking based on the evidence available."
         ),
     }
@@ -461,9 +491,9 @@ def get_assistant_response_1(user_input):
     return assistant_reply
 
 # Function to rank the variants by pathogenicity
-def get_variant_ranking(variants_info, phenotype):
+def get_variant_ranking(variants_info, phenotypes):
     # Construct message with all variants info
-    ranking_message = f"Please rank the following variants by their pathogenicity for the phenotype '{phenotype}':\n\n"
+    ranking_message = f"Please rank the following variants by their pathogenicity for the phenotypes '{', '.join(phenotypes)}':\n\n"
     
     for i, variant in enumerate(variants_info):
         formatted_variant = st.session_state.all_variants_formatted[i] if i < len(st.session_state.all_variants_formatted) else "Unknown format"
@@ -627,7 +657,7 @@ else:
 if (user_input != st.session_state.last_input or user_input_ph != st.session_state.last_input_ph):
     # Reset data when input changes
     st.session_state.last_input = user_input
-    st.session_state.last_input_ph = user_input_ph
+    st.session_state.last_input_ph = phenotypes
     st.session_state.GeneBe_results = []
     st.session_state.InterVar_results = []
     st.session_state.disease_classification_dict = []
@@ -639,6 +669,7 @@ if (user_input != st.session_state.last_input or user_input_ph != st.session_sta
     st.session_state.all_variants_formatted = []
     st.session_state.variant_ranking = ""
     st.session_state.variant_options = []
+    st.session_state.phenotype_paper_matches = {}
     
     # Get assistant's response for variants
     assistant_response = get_assistant_response_initial(user_input)
@@ -701,15 +732,24 @@ if (user_input != st.session_state.last_input or user_input_ph != st.session_sta
     st.session_state.hgvs_val = [variant["hgvs_val"] for variant in all_variants_data]
     st.session_state.paper_count = [variant["paper_count"] for variant in all_variants_data]
     
-    # For the first variant, also scrape papers
-    if st.session_state.variant_count > 0 and len(st.session_state.variant_pmids) > 0:
+    # Process papers for variants with multiple phenotypes
+    if st.session_state.variant_count > 0 and len(st.session_state.variant_pmids) > 0 and phenotypes:
         st.session_state.variant_papers = []
         for i in range(st.session_state.variant_count):
-            if len(st.session_state.variant_pmids[i]) > 0 and st.session_state.last_input_ph:
-                papers = scrape_papers_for_variant(i)
-                st.session_state.variant_papers.append(papers)
+            if len(st.session_state.variant_pmids[i]) > 0:
+                # Scrape papers for all phenotypes
+                phenotype_matches = scrape_papers_for_variant(i, phenotypes)
+                st.session_state.phenotype_paper_matches[i] = phenotype_matches
+                
+                # Combine all papers for this variant across all phenotypes
+                all_papers = []
+                for phenotype, papers in phenotype_matches.items():
+                    all_papers.extend(papers)
+                
+                st.session_state.variant_papers.append(all_papers)
             else:
                 st.session_state.variant_papers.append([])
+                st.session_state.phenotype_paper_matches[i] = {}
 
 # Main interface for variant selection if multiple variants
 if st.session_state.variant_count > 0:
@@ -717,30 +757,29 @@ if st.session_state.variant_count > 0:
     selected_variant = st.selectbox("Select variant to view:", variant_options, index=st.session_state.selected_variant_index)
     st.session_state.selected_variant_index = variant_options.index(selected_variant)
     
-    # If there are multiple variants and a phenotype is provided, show ranking button
-    #if st.session_state.variant_count > 1 and st.session_state.last_input_ph:
-      #  if st.button("Rank variants by pathogenicity for this phenotype"):
-       #     with st.spinner("Ranking variants..."):
-               # all_variants_data_for_ranking = []
-               # for i in range(st.session_state.variant_count):
-                 #   variant_info = {
-                   #     "GeneBe_results": st.session_state.GeneBe_results[i],
-                     #   "paper_count": st.session_state.paper_count[i]
-                   # }
-                    #all_variants_data_for_ranking.append(variant_info)
+    # If there are multiple variants and phenotypes are provided, show ranking button
+    if st.session_state.variant_count > 1 and phenotypes:
+        if st.button("Rank variants by pathogenicity for these phenotypes"):
+            with st.spinner("Ranking variants..."):
+                all_variants_data_for_ranking = []
+                for i in range(st.session_state.variant_count):
+                    variant_info = {
+                        "GeneBe_results": st.session_state.GeneBe_results[i],
+                        "paper_count": st.session_state.paper_count[i]
+                    }
+                    all_variants_data_for_ranking.append(variant_info)
                 
-               # st.session_state.variant_ranking = get_variant_ranking(
-                #    all_variants_data_for_ranking, 
-                #    st.session_state.last_input_ph
-               # )
+                st.session_state.variant_ranking = get_variant_ranking(
+                    all_variants_data_for_ranking, 
+                    phenotypes
+                )
 
-
-        # If there are multiple variants and a phenotype is provided, show overall summary button
-    if st.session_state.variant_count > 0 and st.session_state.last_input_ph:
+    # If there are variants and phenotypes, show overall summary button
+    if st.session_state.variant_count > 0 and phenotypes:
         if st.button("Generate Overall AI Summary"):
             with st.spinner("Analyzing all variants..."):
                 # Prepare comprehensive data for all variants
-                all_variants_summary = "I need a comprehensive analysis of the following variants in relation to the phenotype: " + st.session_state.last_input_ph + "\n\n"
+                all_variants_summary = "I need a comprehensive analysis of the following variants in relation to these phenotypes: " + ", ".join(phenotypes) + "\n\n"
                 
                 for i in range(st.session_state.variant_count):
                     all_variants_summary += f"Variant {i+1}: {st.session_state.all_variants_formatted[i]}\n"
@@ -753,28 +792,30 @@ if st.session_state.variant_count > 0:
                     disease_dict = find_gene_match(gene_symbol, hgnc_id)
                     all_variants_summary += f"ClinGen Gene-Disease relationships: {disease_dict}\n"
                     
-                    # Add paper information (limited to 3 per variant)
-                    if i < len(st.session_state.variant_papers) and st.session_state.variant_papers[i]:
-                        papers_for_variant = st.session_state.variant_papers[i][:3]  # Limit to 3 papers per variant
-                        
-                        # Extract only essential paper info to reduce token count
-                        simplified_papers = []
-                        for paper in papers_for_variant:
-                            simplified_paper = {
-                                "title": paper.get("title", ""),
-                                "abstract": paper.get("abstract", ""),
-                                "doi": paper.get("doi", "")
-                            }
-                            simplified_papers.append(simplified_paper)
-                        
-                        all_variants_summary += f"Related Papers (top 3): {simplified_papers}\n"
+                    # Add paper information for each phenotype (limited to 2 per phenotype per variant)
+                    if i in st.session_state.phenotype_paper_matches:
+                        all_variants_summary += "Related Papers by phenotype:\n"
+                        for phenotype, papers in st.session_state.phenotype_paper_matches[i].items():
+                            phenotype_papers = papers[:2]  # Limit to 2 papers per phenotype
+                            
+                            # Extract only essential paper info to reduce token count
+                            simplified_papers = []
+                            for paper in phenotype_papers:
+                                simplified_paper = {
+                                    "title": paper.get("title", ""),
+                                    "abstract": paper.get("abstract", ""),
+                                    "doi": paper.get("doi", "")
+                                }
+                                simplified_papers.append(simplified_paper)
+                            
+                            all_variants_summary += f"  Phenotype '{phenotype}': {simplified_papers}\n"
                     all_variants_summary += "\n---\n\n"
                 
                 # Add request for ranking and analysis
                 all_variants_summary += f"\nBased on all the data above for each variant, please:\n"
-                all_variants_summary += f"1. Rank the variants from most to least likely to cause the phenotype '{st.session_state.last_input_ph}'.\n"
+                all_variants_summary += f"1. Rank the variants from most to least likely to cause the phenotypes '{', '.join(phenotypes)}'.\n"
                 all_variants_summary += f"2. Explain your reasoning for each variant, considering ACMG classification, ClinGen gene-disease relationships, and evidence from the papers.\n"
-                all_variants_summary += f"3. Provide an overall conclusion about which variant(s) most likely explain the phenotype.\n"
+                all_variants_summary += f"3. Provide an overall conclusion about which variant(s) most likely explain the phenotypes.\n"
                 
                 try:
                     overall_summary = get_assistant_response_1(all_variants_summary)
@@ -789,11 +830,9 @@ if st.session_state.variant_count > 0:
                     )
                 except Exception as e:
                     if "Error code: 413" in str(e):
-                        st.error("The request is too large for the LLM to process. Try analyzing fewer variants or papers.")
+                        st.error("The request is too large for the LLM to process. Try analyzing fewer variants or phenotypes.")
                     else:
                         st.error(f"Error generating summary: {e}")
-
-
 
     # Display the ranking if available
     if st.session_state.variant_ranking:
@@ -830,64 +869,89 @@ if st.session_state.variant_count > 0:
         
         # Display research papers
         st.write("### Research Papers")
-        if st.session_state.last_input_ph == "":
+        if not phenotypes:
             if idx < len(st.session_state.paper_count):
                 st.write(f"{st.session_state.paper_count[idx]} Research papers were found related to this variant.")
-            st.error("Please enter a phenotype to further search these papers.")
+            st.error("Please enter at least one phenotype to further search these papers.")
         else:
             if idx < len(st.session_state.paper_count) and idx < len(st.session_state.variant_papers):
                 paper_count = st.session_state.paper_count[idx]
                 st.write(f"{paper_count} Research papers were found related to this variant.")
-                papers = st.session_state.variant_papers[idx]
-                st.write(f"{len(papers)} of them mention the phenotype: {st.session_state.last_input_ph}")
                 
-                if papers:
-                    papers_df = pd.DataFrame(papers)
-                    papers_df.index = papers_df.index + 1
-                    display_columns = ['title', 'journal', 'date', 'doi']
-                    if all(col in papers_df.columns for col in display_columns):
-                        papers_df = papers_df[display_columns]
-                    
-                    # Display the DataFrame as a table
-                    st.dataframe(papers_df, use_container_width=True)
-                    
-                    # Generate AI summary for this variant
-                    if st.button("Generate AI Summary for this variant"):
-                        with st.spinner("Analyzing papers..."):
-                            papers_copy = copy.deepcopy(papers)
-                            papers_copy = papers_copy[:10]  # Process only 10 papers as LLM is token limited
-                            columns_to_remove = ["authors"]
-                            filtered_papers = [{k: v for k, v in paper.items() if k not in columns_to_remove} for paper in papers_copy]
+                # Display papers by phenotype
+                if idx in st.session_state.phenotype_paper_matches:
+                    phenotype_papers = st.session_state.phenotype_paper_matches[idx]
+                    for phenotype, papers in phenotype_papers.items():
+                        st.write(f"#### Papers mentioning phenotype: {phenotype} ({len(papers)} papers)")
+                        
+                        if papers:
+                            papers_df = pd.DataFrame(papers)
+                            papers_df.index = papers_df.index + 1
+                            display_columns = ['title', 'journal', 'date', 'doi']
+                            if all(col in papers_df.columns for col in display_columns):
+                                papers_df = papers_df[display_columns]
                             
-                            gene_symbol = st.session_state.GeneBe_results[idx][2]
-                            hgnc_id = 'HGNC:'+str(st.session_state.GeneBe_results[idx][3])
-                            disease_dict = find_gene_match(gene_symbol, hgnc_id)
-                            
-                            user_input_1 = f"""The following diseases were found to be linked to the gene in interest: {disease_dict}. 
-                            Explain these diseases, announce if a disease has been refuted, no need to explain that disease.if no diseases found reply with: No linked diseases found based on the ClinGen Gene-Disease database. 
-                            The following papers were found to be linked with the requested variant the and phenotype (disease) in interest ({st.session_state.last_input_ph}): {filtered_papers}. 
-                            Analyze the abstracts of the papers then explain and draw a conclusion on if the variant is likely to cause {st.session_state.last_input_ph} or not.
-                            Whenever providing conclusions or insights, mention which papers were used to draw those conclusions by referencing them using IEEE style like [1].
-                            ensure this is done based on the order of the provided papers. Example if 8 papers were used and papers 2 and 5 were referenced write [2][5]
-                            No need to mention the references again at the end, and no need to mention their titles for referencing purposes.
-                            If no papers were provided, simple dont say anything regarding them."""
-                            
-                            try:
-                                ai_summary = get_assistant_response_1(user_input_1)
-                                st.write("### AI Summary")
-                                st.markdown(
-                                    f"""
-                                    <div class="justified-text">
-                                           {ai_summary}
-                                     </div>
-                                     """,
-                                     unsafe_allow_html=True,
-                                )
-                            except Exception as e:
-                                if "Error code: 413" in str(e):
-                                    st.error("LLM can not handle such a large request. We are working on it!")
-                                else:
-                                    st.error(f"Error generating summary: {e}")
+                            # Display the DataFrame as a table
+                            st.dataframe(papers_df, use_container_width=True)
+                
+                # Generate AI summary for this variant with all phenotypes
+                if st.button("Generate AI Summary for this variant"):
+                    with st.spinner("Analyzing papers..."):
+                        # Create a combined analysis of papers across all phenotypes
+                        all_phenotype_papers = []
+                        
+                        if idx in st.session_state.phenotype_paper_matches:
+                            for phenotype, papers in st.session_state.phenotype_paper_matches[idx].items():
+                                # Get up to 3 papers per phenotype
+                                papers_sample = papers[:3]
+                                
+                                # Add phenotype as metadata to each paper
+                                for paper in papers_sample:
+                                    paper_copy = copy.deepcopy(paper)
+                                    paper_copy["phenotype"] = phenotype
+                                    all_phenotype_papers.append(paper_copy)
+                        
+                        # Limit total papers to 15 to avoid token limits
+                        all_phenotype_papers = all_phenotype_papers[:15]
+                        
+                        # Remove unnecessary fields to reduce token usage
+                        columns_to_remove = ["authors"]
+                        filtered_papers = [{k: v for k, v in paper.items() if k not in columns_to_remove} for paper in all_phenotype_papers]
+                        
+                        gene_symbol = st.session_state.GeneBe_results[idx][2]
+                        hgnc_id = 'HGNC:'+str(st.session_state.GeneBe_results[idx][3])
+                        disease_dict = find_gene_match(gene_symbol, hgnc_id)
+                        
+                        user_input_1 = f"""The following diseases were found to be linked to the gene in interest: {disease_dict}. 
+                        Explain these diseases, announce if a disease has been refuted, no need to explain that disease. If no diseases found reply with: No linked diseases found based on the ClinGen Gene-Disease database. 
+                        
+                        The following papers were found to be linked with the requested variant and the phenotypes of interest ({', '.join(phenotypes)}): {filtered_papers}. 
+                        Analyze the abstracts of the papers then explain and draw a conclusion on if the variant is likely to cause any of the phenotypes or not.
+                        Group your analysis by phenotype, discussing the evidence for each phenotype separately.
+                        
+                        Whenever providing conclusions or insights, mention which papers were used to draw those conclusions by referencing them using IEEE style like [1].
+                        Ensure this is done based on the order of the provided papers. Example if 8 papers were used and papers 2 and 5 were referenced write [2][5]
+                        No need to mention the references again at the end, and no need to mention their titles for referencing purposes.
+                        If no papers were provided for a phenotype, simply state that no evidence was found.
+                        
+                        Conclude with an overall assessment of the variant's relationship to the specified phenotypes."""
+                        
+                        try:
+                            ai_summary = get_assistant_response_1(user_input_1)
+                            st.write("### AI Summary")
+                            st.markdown(
+                                f"""
+                                <div class="justified-text">
+                                       {ai_summary}
+                                 </div>
+                                 """,
+                                 unsafe_allow_html=True,
+                            )
+                        except Exception as e:
+                            if "Error code: 413" in str(e):
+                                st.error("LLM can not handle such a large request. Try with fewer phenotypes.")
+                            else:
+                                st.error(f"Error generating summary: {e}")
 
 # Chatbot assistant
 if "messages" not in st.session_state:
