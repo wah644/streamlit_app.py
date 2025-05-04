@@ -125,7 +125,9 @@ if "all_variants_formatted" not in st.session_state:
     st.session_state.all_variants_formatted = []
 if "phenotype_paper_matches" not in st.session_state:
     st.session_state.phenotype_paper_matches = {}
-
+if "selected_variant_index" not in st.session_state:
+    st.session_state.selected_variant_index = 0
+    
 #read gene-disease-curation file
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
 df = pd.read_csv(file_url)
@@ -286,32 +288,38 @@ def snp_to_vcf(snp_id):
     global eutils_data
     formatted_alleles.clear()
     
-    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-    params = {
-        "db": "snp",
-        "id": snp_id,
-        "rettype": "json",
-        "retmode": "text",
-        "api_key": eutils_api_key
-    }
-    response = requests.get(url, params=params)
-    
-    if response.status_code == 200:
-        try:
-            eutils_data = response.json()
-            filtered_data = eutils_data["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
-    
-            for allele in filtered_data[1:]:
-                vcf_format = allele["allele"]["spdi"]
-                new_format = convert_format(vcf_format["seq_id"], vcf_format["position"]+1, vcf_format["deleted_sequence"], vcf_format["inserted_sequence"])
-                if new_format != "Invalid format":
-                    formatted_alleles.append(new_format)
-            return formatted_alleles
-        except JSONDecodeError as E:
-            st.error("Invalid rs value entered. Please try again.")
+    try:
+        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+        params = {
+            "db": "snp",
+            "id": snp_id.replace("rs", ""),  # Remove 'rs' prefix if present
+            "rettype": "json",
+            "retmode": "text",
+            "api_key": eutils_api_key
+        }
+        response = requests.get(url, params=params)
+        
+        if response.status_code == 200:
+            try:
+                eutils_data = response.json()
+                if "primary_snapshot_data" in eutils_data and "placements_with_allele" in eutils_data["primary_snapshot_data"]:
+                    filtered_data = eutils_data["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
+            
+                    for allele in filtered_data[1:]:
+                        if "allele" in allele and "spdi" in allele["allele"]:
+                            vcf_format = allele["allele"]["spdi"]
+                            new_format = convert_format(vcf_format["seq_id"], vcf_format["position"]+1, vcf_format["deleted_sequence"], vcf_format["inserted_sequence"])
+                            if new_format != "Invalid format":
+                                formatted_alleles.append(new_format)
+                return formatted_alleles
+            except JSONDecodeError:
+                st.error(f"Invalid rs value entered: {snp_id}. Please try again.")
+                return []
+        else:
+            st.error(f"Error: {response.status_code}, Unable to fetch data for {snp_id}")
             return []
-    else:
-        st.error(f"Error: {response.status_code}, {response.text}")
+    except Exception as e:
+        st.error(f"Error processing rs value {snp_id}: {str(e)}")
         return []
 
 def find_mRNA():
@@ -759,6 +767,19 @@ if (user_input != st.session_state.last_input or user_input_ph != st.session_sta
 # Main interface for variant selection if multiple variants
 if st.session_state.variant_count > 0:
     variant_options = [f"Variant {i+1}: {st.session_state.all_variants_formatted[i]}" for i in range(st.session_state.variant_count)]
+    
+    # Check if variant_options is not empty before creating selectbox
+    if variant_options:
+        # Make sure the selected_variant_index is in bounds
+        if "selected_variant_index" not in st.session_state or st.session_state.selected_variant_index >= len(variant_options):
+            st.session_state.selected_variant_index = 0
+            
+        selected_variant = st.selectbox("Select variant to view:", variant_options, index=st.session_state.selected_variant_index)
+        st.session_state.selected_variant_index = variant_options.index(selected_variant)
+        
+        # Rest of your code...
+    else:
+        st.error("No valid variants were found. Please check your input and try again.")
     selected_variant = st.selectbox("Select variant to view:", variant_options, index=st.session_state.selected_variant_index)
     st.session_state.selected_variant_index = variant_options.index(selected_variant)
     
