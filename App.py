@@ -910,6 +910,12 @@ if st.session_state.variant_count > 0:
             all_variants_summary += f"3. Explain your reasoning for each variant, considering all available evidence.\n"
             all_variants_summary += f"4. Provide an overall conclusion about which variant(s) most likely explain the phenotypes.\n"
             all_variants_summary += f"5. Specifically mention the gene-phenotype literature evidence in your analysis when relevant.\n"
+
+
+            all_variants_summary += f"Additional Rules: 
+                                    For HLA genes & variants prioritize based on variant level evidences rather than gene level
+                                    Consider the overall HPO and phenotype terms rather than 1 only
+                                    Prioritize ACMG pathogenic classificaiton .\n"
             
             try:
                 overall_summary = get_assistant_response_1(all_variants_summary)
