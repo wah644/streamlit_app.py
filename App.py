@@ -499,7 +499,7 @@ def get_assistant_response_initial(user_input):
         groq_messages.insert(0, {"role": message["role"], "content": message["content"]})
         
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="deepseek-r1-distill-llama-70b",
         messages=groq_messages,
         temperature=temp_val,
         max_completion_tokens=512,
@@ -565,7 +565,7 @@ if language == "Arabic":
 def get_assistant_response_1(user_input):
     full_message = SYSTEM_1 + [{"role": "user", "content": user_input}]
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="deepseek-r1-distill-llama-70b",
         messages=full_message,
         temperature=temp_val,
         max_completion_tokens=1024,
@@ -584,7 +584,7 @@ def get_assistant_response(chat_history):
     full_conversation = SYSTEM + chat_history  
 
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="deepseek-r1-distill-llama-70b",
         messages=full_conversation,
         temperature=temp_val,
         max_completion_tokens=1024,
