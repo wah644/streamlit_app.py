@@ -149,6 +149,8 @@ initial_messages = [
             "Remember bases can be multiple letters (e.g., chr6:160585140-T>GG). "
             "Remember, ref bases can simply be deleted (no alt base) and therefore the alt base value can be left blank. Example:"
             "User input: chr6:160585140-T>. You respond: 6,160585140,T,,hg38. since T was deleted and not replaced with anything."
+            "Remember, chromosome values, in addition to number values in range 1-22 can be either letters X or Y"
+            "User input: X	48683859	TG	T, You respond: X,48683859,TG,T,hg38"
             "If the user enters rs values (e.g., rs12345), simply return the rs value on each line."
             "Example: User input: rs12345 and rs67890. You respond: "
             "rs12345"
