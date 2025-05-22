@@ -789,34 +789,39 @@ st.markdown(
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Main Streamlit interactions:
-# Add this near the top of your main interface (after language selection)
-uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
-
-# Initialize phenotypes as empty list
+# Initialize variables
+user_input = ""
 phenotypes = []
 
+# File uploader
+uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
+
 if uploaded_file is not None:
-    html_content = uploaded_file.read().decode("utf-8")
-    
-    # Extract variants and HPO IDs from HTML
-    variants = extract_variants_with_regex(html_content)
-    hpo_ids = extract_hpo_ids(html_content)
-    
-    # Convert to format your app expects
-    user_input = "\n".join(variants)
-    phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
-    
-    # Store in session state
-    st.session_state.last_input = user_input
-    st.session_state.last_input_ph = phenotypes
-else:
-    # If no file uploaded, ensure phenotypes is empty
-    phenotypes = []
-    st.session_state.last_input_ph = []
+    try:
+        html_content = uploaded_file.read().decode("utf-8")
+        
+        # Extract variants and HPO IDs from HTML
+        variants = extract_variants_with_regex(html_content)
+        hpo_ids = extract_hpo_ids(html_content)
+        
+        # Convert to format your app expects
+        user_input = "\n".join(variants)
+        phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+        
+        # Store in session state
+        st.session_state.last_input = user_input
+        st.session_state.last_input_ph = phenotypes
+        
+    except Exception as e:
+        st.error(f"Error processing file: {str(e)}")
+        user_input = ""
+        phenotypes = []
 
 
-# Get phenotypes from session state if available
-phenotypes = st.session_state.get("last_input_ph", [])
+# Get current input from session state or initialize
+current_input = st.session_state.get("last_input", "")
+current_phenotypes = st.session_state.get("last_input_ph", [])
+
 # Limit to 5 phenotypes
 phenotypes = phenotypes[:20]
 
