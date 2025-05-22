@@ -795,6 +795,8 @@ user_input = ""
 phenotypes = []
 
 # File uploader
+uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
+
 if uploaded_file is not None:
     try:
         # Clear previous results (but keep language preference)
