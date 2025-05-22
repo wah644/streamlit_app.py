@@ -361,7 +361,7 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
 
 
 
-ef snp_to_vcf(snp_id):
+def snp_to_vcf(snp_id):
     try:
         # Split by hyphen to get components
         parts = snp_id.split('-')
