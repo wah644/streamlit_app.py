@@ -393,12 +393,6 @@ def snp_to_vcf(snp_id):
         return []
 
 # Example run
-if __name__ == "__main__":
-    snp_id = input("Enter rsID (e.g., rs699): ")
-    result = snp_to_vcf(snp_id)
-    print("Formatted alleles:", result)
-
-
 
 
 def find_mRNA():
