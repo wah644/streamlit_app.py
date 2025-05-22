@@ -796,29 +796,47 @@ phenotypes = []
 # File uploader
 uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
 
+# === ADD THIS BLOCK RIGHT AFTER UPLOADER ===
 if uploaded_file is not None:
+    # Clear previous results (but keep language preference)
+    lang = st.session_state.get("language", "English")
+    st.session_state.clear()
+    st.session_state["language"] = lang
+    
     try:
         html_content = uploaded_file.read().decode("utf-8")
-        
-        # Extract variants and HPO IDs from HTML
         variants = extract_variants_with_regex(html_content)
         hpo_ids = extract_hpo_ids(html_content)
         
-        # Convert to format your app expects
-        user_input = "\n".join(variants)
-        phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+        # Debug output (optional)
+        st.write(f"Found {len(variants)} variants and {len(hpo_ids)} HPO IDs")
         
-        # Store in session state
-        st.session_state.last_input = user_input
-        st.session_state.last_input_ph = phenotypes
-        
+        if variants:  # Only proceed if variants were found
+            user_input = "\n".join(variants)
+            phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+            
+            # Store inputs
+            st.session_state.last_input = user_input
+            st.session_state.last_input_ph = phenotypes
+            
+            # Process variants immediately
+            with st.spinner("Processing variants..."):
+                assistant_response = get_assistant_response_initial(user_input)
+                variant_responses = [line.strip() for line in assistant_response.split('\n') if line.strip()]
+                variant_responses = variant_responses[:10]  # Limit to 10 variants
+                st.session_state.variant_count = len(variant_responses)
+                
+                # Rest of your processing logic...
+                # (Move all the variant processing code here that was previously after the session state checks)
+                
+            st.session_state.file_processed = True
+        else:
+            st.error("No variants found in the uploaded file")
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
-        user_input = ""
-        phenotypes = []
+# === END OF ADDED BLOCK ===
 
-
-# Get current input from session state or initialize
+# Your existing session state checks can remain, but modify them:
 current_input = st.session_state.get("last_input", "")
 current_phenotypes = st.session_state.get("last_input_ph", [])
 
