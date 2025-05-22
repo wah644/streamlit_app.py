@@ -1042,6 +1042,12 @@ if st.session_state.variant_count > 0:
 
 
 # Display selected variant information
+if "variant_selector" in st.session_state:
+    selected_text = st.session_state.variant_selector
+    idx = int(selected_text.split(":")[0].replace("Variant ", "")) - 1
+    st.session_state.selected_variant_index = idx
+
+
 if st.session_state.variant_count > 0:
     idx = st.session_state.selected_variant_index
     
