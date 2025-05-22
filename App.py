@@ -839,9 +839,7 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
         
-# Your existing session state checks can remain, but modify them:
-current_input = st.session_state.get("last_input", "")
-current_phenotypes = st.session_state.get("last_input_ph", [])
+
 # Limit to 5 phenotypes
 phenotypes = phenotypes[:20]
 
