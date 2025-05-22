@@ -354,20 +354,9 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
         return "Invalid format"
         
 #Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'
-def convert_format(seq_id, pos, ref, alt):
-    """Convert from sequence ID format to desired output format"""
+def convert_format(chrom, pos, ref, alt):
+    """Convert from chromosome-position-ref-alt format to desired output format"""
     try:
-        # Extract chromosome from seq_id (simplified)
-        if "NC_" in seq_id:
-            # Extract chromosome number from NC format
-            chrom_part = seq_id.split('.')[0].replace('NC_', '').replace('000', '')
-            if chrom_part.startswith('00'):
-                chrom = chrom_part[2:].lstrip('0') or '1'
-            else:
-                chrom = chrom_part.lstrip('0') or '1'
-        else:
-            chrom = "1"  # Default fallback
-            
         return f"{chrom},{pos},{ref},{alt},hg38"
     except Exception:
         return "Invalid format"
@@ -375,56 +364,40 @@ def convert_format(seq_id, pos, ref, alt):
 
 #API call to e-utils for a specific variant
 def snp_to_vcf(snp_id):
-    global eutils_data
     formatted_alleles = []
-    
+
     try:
-        # Parse the direct format instead of API call
-        eutils_data = f"Direct parsing of {snp_id}"
-        
-        # Split by hyphen to get components
-        parts = snp_id.split('-')
-        
-        if len(parts) != 4:
-            st.error(f"Invalid format: {snp_id}. Expected format: X-137031256-G-A")
+        # Parse the direct format (X-137031256-G-A) instead of using genebe
+        if not snp_id:
+            print(f"Could not parse variant: {snp_id}")
             return []
-            
-        chromosome, position, ref, alt = parts
-        
-        # Convert chromosome format if needed
-        if chromosome.isdigit():
-            chromosome = chromosome  # Keep numeric chromosomes as is
-        elif chromosome.upper() in ['X', 'Y']:
-            chromosome = chromosome.upper()  # Ensure X, Y are uppercase
-        else:
-            st.error(f"Invalid chromosome: {chromosome}")
+
+        # Handle the direct format input
+        variant_str = snp_id  # Direct input is already in the right format
+
+        # Now split into components
+        try:
+            chrom, pos, ref, alt = variant_str.split('-')
+            pos = int(pos)  # Ensure it's an int
+        except Exception as e:
+            print(f"Failed to split parsed variant: {e}")
             return []
-            
-        # Validate position is numeric
-        if not position.isdigit():
-            st.error(f"Invalid position: {position}")
+
+        # If you have a convert_format() function, use it:
+        # Example: convert_format(seq_id, pos, ref, alt)
+        try:
+            new_format = convert_format(chrom, pos, ref, alt)
+        except Exception as e:
+            print(f"convert_format() failed: {e}")
             return []
-            
-        # Validate ref and alt are valid DNA bases
-        valid_bases = set('ACGT')
-        if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
-            st.error(f"Invalid bases - ref: {ref}, alt: {alt}")
-            return []
-        
-        # Create SPDI-like format for processing (simulating the original logic)
-        # Using position-1 to match SPDI 0-based indexing, then adding 1 back in convert_format
-        pos = int(position) - 1
-        seq_id = f"NC_00000{chromosome.zfill(2)}.11"  # Simulate sequence ID
-        
-        # Use the same convert_format function as before
-        new_format = convert_format(seq_id, pos+1, ref.upper(), alt.upper())
+
         if new_format != "Invalid format":
             formatted_alleles.append(new_format)
-        
+
         return formatted_alleles
-        
+
     except Exception as e:
-        st.error(f"Error processing rs value {snp_id}: {str(e)}")
+        print(f"Error processing {snp_id}: {e}")
         return []
 
 def find_mRNA():
