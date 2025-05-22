@@ -840,6 +840,7 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
                 
             st.session_state.last_input = user_input
             st.session_state.last_input_ph = phenotypes
+            st.write(phenotypes)
                 
                 # Process variants
             with st.spinner("Processing variants..."):
