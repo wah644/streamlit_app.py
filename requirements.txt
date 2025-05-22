@@ -4,3 +4,4 @@ paperscraper
 setuptools
 genebe
 cyvcf2
+obonet
