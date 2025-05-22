@@ -132,6 +132,9 @@ if 'last_uploaded_filename' not in st.session_state:
     st.session_state.last_uploaded_filename = ""
 if "file_processed" not in st.session_state:
     st.session_state.file_processed = False
+if "phenotypes" not in st.session_state:
+    st.session_state.phenotypes = []
+
 
 #read gene-disease-curation file
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
@@ -795,7 +798,7 @@ st.markdown(
 # Main Streamlit interactions:
 # Initialize variables
 user_input = ""
-phenotypes = []
+phenotypes = st.session_state.phenotypes
 
 uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["vcf", "txt", "json", "html"])
 
@@ -806,8 +809,6 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
     st.session_state.file_processed = True
     st.session_state.last_uploaded_filename = uploaded_file.name
     # Reset data when input changes
-    st.session_state.last_input = user_input
-    st.session_state.last_input_ph = phenotypes
     st.session_state.GeneBe_results = []
     st.session_state.InterVar_results = []
     st.session_state.disease_classification_dict = []
@@ -820,8 +821,7 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
     st.session_state.variant_options = []
     st.session_state.phenotype_paper_matches = {}
     st.session_state.variant_count = 0
-    if phenotypes != st.session_state.last_input_ph:
-        st.session_state.gene_phenotype_counts = {}
+    st.session_state.gene_phenotype_counts = {}
 
     
     # Check if a new file is uploaded
@@ -838,9 +838,7 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
             # Limit to 5 phenotypes
             phenotypes = phenotypes[:20]
                 
-            st.session_state.last_input = user_input
-            st.session_state.last_input_ph = phenotypes
-            st.write(phenotypes)
+             st.session_state.phenotypes = phenotypes
                 
                 # Process variants
             with st.spinner("Processing variants..."):
