@@ -11,6 +11,7 @@ from paperscraper.pubmed import get_and_dump_pubmed_papers
 import json
 import os
 import copy
+import genebe as gnb
 
 
 parts = []
@@ -364,74 +365,54 @@ def convert_variant_format(variant: str) -> str:
         raise ValueError("Invalid variant format")
 
 #API call to e-utils for a specific variant
+
+
 def snp_to_vcf(snp_id):
-    global eutils_data
     formatted_alleles = []
-    
+
     try:
-        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-        params = {
-            "db": "snp",
-            "id": snp_id.replace("rs", ""),  # Remove 'rs' prefix if present
-            "rettype": "chr",
-            "retmode": "text",
-            "api_key": eutils_api_key
-        }
-        response = requests.get(url, params=params)
-        
-        if response.status_code == 200:
-            try:
-                # Parse XML response
-                from xml.etree import ElementTree as ET
-                eutils_data = response.text
-                
-                # Parse the XML string
-                root = ET.fromstring(eutils_data)
-                
-                # Extract chromosome and position from CHRPOS
-                chrpos_element = root.find(".//CHRPOS")
-                if chrpos_element is not None and chrpos_element.text:
-                    chr_pos = chrpos_element.text.split(':')
-                    if len(chr_pos) == 2:
-                        chromosome = chr_pos[0]
-                        position = chr_pos[1]
-                    else:
-                        st.error(f"Invalid CHRPOS format for {snp_id}")
-                        return []
-                else:
-                    st.error(f"Could not find CHRPOS element for {snp_id}")
-                    return []
-                
-                # Extract reference and alternate alleles from SPDI
-                spdi_element = root.find(".//SPDI")
-                if spdi_element is not None and spdi_element.text:
-                    # SPDI format example: NC_000001.11:230710020:G:A,NC_000001.11:230710020:G:T
-                    spdi_values = spdi_element.text.split(',')
-                    
-                    for spdi in spdi_values:
-                        parts = spdi.split(':')
-                        if len(parts) == 4:
-                            seq_id = parts[0]
-                            pos = int(parts[1])
-                            ref = parts[2]
-                            alt = parts[3]
-                            
-                            # Use the same convert_format function as before
-                            new_format = convert_format(seq_id, pos+1, ref, alt)
-                            if new_format != "Invalid format":
-                                formatted_alleles.append(new_format)
-                
-                return formatted_alleles
-            
-            except Exception as e:
-                st.error(f"Error parsing data for {snp_id}: {str(e)}")
-                return []
-        else:
-            st.error(f"Error: {response.status_code}, Unable to fetch data for {snp_id}")
+        # Parse the rsID into chr-pos-ref-alt format using genebe
+        parsed = gnb.parse_variants([snp_id], genome="hg38")
+
+        if not parsed:
+            print(f"Could not parse variant: {snp_id}")
             return []
+
+        # Handle both formats: dict or string
+        if isinstance(parsed[0], dict):
+            variant_str = parsed[0]['variant']
+        elif isinstance(parsed[0], str):
+            variant_str = parsed[0]
+        else:
+            print(f"Unexpected format from parse_variants() for {snp_id}")
+            return []
+
+        # Now split into components
+        try:
+            chrom, pos, ref, alt = variant_str.split('-')
+            pos = int(pos)  # Ensure it's an int
+        except Exception as e:
+            print(f"Failed to split parsed variant: {e}")
+            return []
+
+        # If you have a convert_format() function, use it:
+        # Example: convert_format(seq_id, pos, ref, alt)
+        try:
+            new_format = convert_format(chrom, pos, ref, alt)
+        except Exception as e:
+            print(f"convert_format() failed: {e}")
+            return []
+
+        if new_format != "Invalid format":
+            formatted_alleles.append(new_format)
+
+        return formatted_alleles
+
     except Exception as e:
-        st.error(f"Error processing rs value {snp_id}: {str(e)}")
+        print(f"Error processing {snp_id}: {e}")
         return []
+
+
 
 def find_mRNA():
     global eutils_data
