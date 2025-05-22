@@ -812,30 +812,19 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
         if variant_response.lower().startswith("rs"):
             snp_id = variant_response.split()[0]
             formatted_alleles_result = snp_to_vcf(snp_id)
-            
-            if len(formatted_alleles_result) > 1:
-                # Store variant options for later selection
-                st.session_state.variant_options.append(formatted_alleles_result)
-                # For now, just process the first allele option but will allow selection later
-                variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
-                if pmids:
-                    st.session_state.variant_pmids.append(pmids)
-                else:
-                    st.session_state.variant_pmids.append([])
-                all_variants_data.append(variant_data)
-            else:
+        
                 # Single allele rs variant
-                if formatted_alleles_result:
-                    variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
-                else:
+            if formatted_alleles_result:
+                variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
+            else:
                     # Invalid or no alleles found
-                    variant_data, pmids = process_variant(variant_response, i)
+                variant_data, pmids = process_variant(variant_response, i)
                 
-                if pmids:
-                    st.session_state.variant_pmids.append(pmids)
-                else:
-                    st.session_state.variant_pmids.append([])
-                all_variants_data.append(variant_data)
+            if pmids:
+                st.session_state.variant_pmids.append(pmids)
+            else:
+                st.session_state.variant_pmids.append([])
+            all_variants_data.append(variant_data)
         else:
             # Direct genomic variant
             variant_data, pmids = process_variant(variant_response, i)
