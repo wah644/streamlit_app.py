@@ -697,7 +697,7 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
     # Process each variant
     all_variants_data = []
     # Process each variant
-    all_variants_data = process_variants(variant_responses)
+    all_variants_data = process_variant(variant_responses)
     # Store all variant data
     st.session_state.GeneBe_results = [variant["GeneBe_results"] for variant in all_variants_data]
     st.session_state.InterVar_results = [variant["InterVar_results"] for variant in all_variants_data]
