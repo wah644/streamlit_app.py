@@ -858,6 +858,7 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
     st.session_state.all_variants_formatted = []
     st.session_state.variant_options = []
     st.session_state.phenotype_paper_matches = {}
+    st.session_state.selected_variant_index = 0
     if phenotypes != st.session_state.last_input_ph:
         st.session_state.gene_phenotype_counts = {}
     
