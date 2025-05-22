@@ -935,7 +935,7 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
 
 # Main interface for variant selection if multiple variants
 # Main interface for variant selection
-if st.session_state.get('variant_count', 0) > 0:
+if st.session_state.variant_count > 0:
     # Create options safely
     variant_options = [
         f"Variant {i+1}: {variant}" 
