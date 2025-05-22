@@ -354,63 +354,50 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
     else:
         return "Invalid format"
         
-#Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'
-def convert_variant_format(variant: str) -> str:
-    match = re.match(r'chr(\d+):([0-9]+)-([ACGT]+)>([ACGT]*)', variant)
-    if match:
-        chrom, position, ref, alt = match.groups()
-        alt = alt if alt else ""  # Handle cases where alt is missing
-        return f"{chrom},{position},{ref},{alt},hg38"
-    else:
-        raise ValueError("Invalid variant format")
+
 
 #API call to e-utils for a specific variant
+
+
 
 
 def snp_to_vcf(snp_id):
     formatted_alleles = []
 
     try:
-        # Parse the rsID into chr-pos-ref-alt format using genebe
+        # Parse the rsID using genebe
         parsed = gnb.parse_variants([snp_id], genome="hg38")
+        
+        for variant in parsed:
+            try:
+                # Each parsed variant has a string like 'chr2:166199148-C>A'
+                var_str = variant["input"]
+                # Normalize format for your converter function
+                var_str = var_str.replace(">", ">").replace(":", ":")  # ensure format is safe
 
-        if not parsed:
-            print(f"Could not parse variant: {snp_id}")
-            return []
-
-        # Handle both formats: dict or string
-        if isinstance(parsed[0], dict):
-            variant_str = parsed[0]['variant']
-        elif isinstance(parsed[0], str):
-            variant_str = parsed[0]
-        else:
-            print(f"Unexpected format from parse_variants() for {snp_id}")
-            return []
-
-        # Now split into components
-        try:
-            chrom, pos, ref, alt = variant_str.split('-')
-            pos = int(pos)  # Ensure it's an int
-        except Exception as e:
-            print(f"Failed to split parsed variant: {e}")
-            return []
-
-        # If you have a convert_format() function, use it:
-        # Example: convert_format(seq_id, pos, ref, alt)
-        try:
-            new_format = convert_format(chrom, pos, ref, alt)
-        except Exception as e:
-            print(f"convert_format() failed: {e}")
-            return []
-
-        if new_format != "Invalid format":
-            formatted_alleles.append(new_format)
+                # Convert using your formatting rule
+                match = re.match(r'chr(\w+):(\d+)-([ACGT]+)>([ACGT]*)', var_str)
+                if match:
+                    chrom, position, ref, alt = match.groups()
+                    formatted = f"{chrom},{position},{ref},{alt},hg38"
+                    formatted_alleles.append(formatted)
+                else:
+                    print(f"Could not convert: {var_str}")
+            except Exception as ve:
+                print(f"Error formatting variant: {ve}")
 
         return formatted_alleles
 
     except Exception as e:
         print(f"Error processing {snp_id}: {e}")
         return []
+
+# Example run
+if __name__ == "__main__":
+    snp_id = input("Enter rsID (e.g., rs699): ")
+    result = snp_to_vcf(snp_id)
+    print("Formatted alleles:", result)
+
 
 
 
@@ -770,30 +757,19 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
         if variant_response.lower().startswith("rs"):
             snp_id = variant_response.split()[0]
             formatted_alleles_result = snp_to_vcf(snp_id)
-            
-            if len(formatted_alleles_result) > 1:
-                # Store variant options for later selection
-                st.session_state.variant_options.append(formatted_alleles_result)
-                # For now, just process the first allele option but will allow selection later
-                variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
-                if pmids:
-                    st.session_state.variant_pmids.append(pmids)
-                else:
-                    st.session_state.variant_pmids.append([])
-                all_variants_data.append(variant_data)
-            else:
+    
                 # Single allele rs variant
-                if formatted_alleles_result:
-                    variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
-                else:
+            if formatted_alleles_result:
+                variant_data, pmids = process_variant(formatted_alleles_result[0], i)
+            else:
                     # Invalid or no alleles found
-                    variant_data, pmids = process_variant(variant_response, i)
+                variant_data, pmids = process_variant(variant_response, i)
                 
-                if pmids:
-                    st.session_state.variant_pmids.append(pmids)
-                else:
-                    st.session_state.variant_pmids.append([])
-                all_variants_data.append(variant_data)
+            if pmids:
+                st.session_state.variant_pmids.append(pmids)
+            else:
+                st.session_state.variant_pmids.append([])
+            all_variants_data.append(variant_data)
         else:
             # Direct genomic variant
             variant_data, pmids = process_variant(variant_response, i)
