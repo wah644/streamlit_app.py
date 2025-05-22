@@ -796,11 +796,9 @@ st.markdown(
 user_input = ""
 phenotypes = []
 
-uploaded_file = st.file_uploader("Upload file", type=["vcf", "txt", "json", "html"])
-# Limit to 5 phenotypes
-phenotypes = phenotypes[:20]
+uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["vcf", "txt", "json", "html"])
 
-if uploaded_file is not None and st.session_state.last_uploaded_filename != uploaded_file.name:
+if uploaded_file is not None and st.session_state.get("last_uploaded_filename") != uploaded_file.name:
     st.write(st.session_state.last_uploaded_filename)
     st.write(uploaded_file.name)
         # New file uploaded — reset relevant state
@@ -844,6 +842,8 @@ if uploaded_file is not None and st.session_state.last_uploaded_filename != uplo
         if variants:
             user_input = "\n".join(variants)
             phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+            # Limit to 5 phenotypes
+            phenotypes = phenotypes[:20]
                 
             st.session_state.last_input = user_input
             st.session_state.last_input_ph = phenotypes
