@@ -801,7 +801,8 @@ uploaded_file = st.file_uploader("Upload file", type=["vcf", "txt", "json", "htm
 phenotypes = phenotypes[:20]
 
 if uploaded_file is not None and st.session_state.last_uploaded_filename != uploaded_file.name:
-        
+    st.write(st.session_state.last_uploaded_filename)
+    st.write(uploaded_file.name)
         # New file uploaded — reset relevant state
     st.session_state.last_uploaded_filename = uploaded_file.name
     # Reset data when input changes
@@ -1095,7 +1096,7 @@ if st.session_state.variant_count > 0:
                 if idx in st.session_state.phenotype_paper_matches:
                     phenotype_papers = st.session_state.phenotype_paper_matches[idx]
                     for phenotype, papers in phenotype_papers.items():
-                        st.write(f"#### {phenotype} ({len(papers)} papers)")
+                        st.write(f"{phenotype} ({len(papers)} papers)")
                         
                         if papers:
                             papers_df = pd.DataFrame(papers)
