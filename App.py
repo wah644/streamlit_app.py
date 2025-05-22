@@ -624,7 +624,7 @@ def get_assistant_response_1(user_input):
         model="llama-3.3-70b-versatile",
         messages=full_message,
         temperature=temp_val,
-        max_completion_tokens=1024,
+        max_completion_tokens=2048,
         top_p=top_p_val,
         stream=False,
         stop=None,
