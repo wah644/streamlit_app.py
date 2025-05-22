@@ -361,36 +361,44 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
 
 
 
-def snp_to_vcf(snp_id):
-    formatted_alleles = []
-
+ef snp_to_vcf(snp_id):
     try:
-        # Parse the rsID using genebe
-        parsed = gnb.parse_variants([snp_id], genome="hg38")
+        # Split by hyphen to get components
+        parts = snp_id.split('-')
         
-        for variant in parsed:
-            try:
-                # Each parsed variant has a string like 'chr2:166199148-C>A'
-                var_str = variant["input"]
-                # Normalize format for your converter function
-                var_str = var_str.replace(">", ">").replace(":", ":")  # ensure format is safe
-
-                # Convert using your formatting rule
-                match = re.match(r'chr(\w+):(\d+)-([ACGT]+)>([ACGT]*)', var_str)
-                if match:
-                    chrom, position, ref, alt = match.groups()
-                    formatted = f"{chrom},{position},{ref},{alt},hg38"
-                    formatted_alleles.append(formatted)
-                else:
-                    print(f"Could not convert: {var_str}")
-            except Exception as ve:
-                print(f"Error formatting variant: {ve}")
-
-        return formatted_alleles
-
+        if len(parts) != 4:
+            print(f"Invalid format: {snp_id}. Expected format: X-137031256-G-A")
+            return None
+            
+        chrom, position, ref, alt = parts
+        
+        # Convert chromosome format if needed
+        # X, Y stay as is, numbers stay as is
+        if chrom.isdigit():
+            chrom = chrom  # Keep numeric chromosomes as is
+        elif chrom.upper() in ['X', 'Y']:
+            chrom = chrom.upper()  # Ensure X, Y are uppercase
+        else:
+            print(f"Invalid chromosome: {chrom}")
+            return None
+            
+        # Validate position is numeric
+        if not position.isdigit():
+            print(f"Invalid position: {position}")
+            return None
+            
+        # Validate ref and alt are valid DNA bases
+        valid_bases = set('ACGT')
+        if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
+            print(f"Invalid bases - ref: {ref}, alt: {alt}")
+            return None
+            
+        formatted = f"{chrom},{position},{ref.upper()},{alt.upper()},hg38"
+        return formatted
+        
     except Exception as e:
         print(f"Error processing {snp_id}: {e}")
-        return []
+        return None
 
 # Example run
 
