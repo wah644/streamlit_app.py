@@ -11,7 +11,6 @@ from paperscraper.pubmed import get_and_dump_pubmed_papers
 import json
 import os
 import copy
-import genebe as gnb
 
 
 parts = []
@@ -174,110 +173,84 @@ if language == "Arabic":
 
 #ALL FUNCTIONS
 
-# Replace the existing process_variant function
-def process_variant(variant_response, variant_index):
-    """Process a single variant using genebe library directly"""
+def on_variant_select():
+    # This function intentionally left empty - it's just to capture the callback
+    pass
+
+def get_gene_phenotype_paper_counts(gene_symbol, phenotypes):
+    """
+    Search for papers that link a gene with specific phenotypes
+    Returns a dictionary with phenotype as key and paper count as value
+    Uses session state to cache results and avoid redundant API calls
+    """
+    # Validate and convert gene_symbol to string
+    if gene_symbol is None:
+        print("Warning: gene_symbol is None")
+        return {}
     
-    # Initialize results for this variant
-    variant_data = {
-        "GeneBe_results": ['-','-','-','-','-','-','-','-'],
-        "InterVar_results": ['-','','-',''],
-        "disease_classification_dict": {"No diseases found"},
-        "hgvs_val": "",
-        "paper_count": 0,
-        "papers": []
-    }
+    # Convert to string and strip whitespace
+    gene_symbol = str(gene_symbol).strip()
     
+    if not gene_symbol:
+        print("Warning: gene_symbol is empty after conversion")
+        return {}
+    
+    # Validate phenotypes
+    if not phenotypes:
+        print("Warning: phenotypes list is empty or None")
+        return {}
+    
+    # Create a unique key for this gene-phenotypes combination
+    cache_key = f"{gene_symbol}_{'_'.join(sorted([str(p) for p in phenotypes if p is not None]))}"
+    
+    # Check if we already have the results in session state
+    if hasattr(st.session_state, 'gene_phenotype_counts') and cache_key in st.session_state.gene_phenotype_counts:
+        return st.session_state.gene_phenotype_counts[cache_key]
+    
+    # Initialize the cache if it doesn't exist
+    if not hasattr(st.session_state, 'gene_phenotype_counts'):
+        st.session_state.gene_phenotype_counts = {}
+    
+    counts = {}
+    
+    # Encode the gene symbol properly for the API call
     try:
-        # Check if it's an rs value or positional format
-        if variant_response.lower().startswith("rs"):
-            # Use rs value directly with genebe
-            input_variants = [variant_response]
-        else:
-            # Parse positional format and convert to genebe format
-            is_valid, parts = get_variant_info(variant_response)
-            if not is_valid:
-                return variant_data, None
-            
-            # Convert to genebe format: chr-pos-ref-alt
-            genebe_format = f"{parts[0]}-{parts[1]}-{parts[2]}-{parts[3]}"
-            input_variants = [genebe_format]
-        
-        # Annotate using genebe library
-        annotations = gnb.annotate(
-            input_variants,
-            use_ensembl=True,
-            use_refseq=False,
-            genome="hg38",
-            batch_size=1,
-            output_format="list"
-        )
-        
-        if annotations and len(annotations) > 0:
-            annotation = annotations[0]
-            
-            # Extract GeneBe results
-            variant_data["GeneBe_results"][0] = annotation.get("acmg_classification", "Not Available")
-            variant_data["GeneBe_results"][1] = annotation.get("effect", "Not Available")
-            variant_data["GeneBe_results"][2] = annotation.get("gene_symbol", "Not Available")
-            variant_data["GeneBe_results"][3] = annotation.get("gene_hgnc_id", "Not Available")
-            variant_data["GeneBe_results"][4] = annotation.get("dbsnp", "Not Available")
-            variant_data["GeneBe_results"][5] = annotation.get("frequency_reference_population", "Not Available")
-            variant_data["GeneBe_results"][6] = annotation.get("acmg_score", "Not Available")
-            variant_data["GeneBe_results"][7] = annotation.get("acmg_criteria", "Not Available")
-            
-            # Handle HGVS information
-            hgvs_info = []
-            if annotation.get("gene_symbol"):
-                hgvs_info.append(annotation.get("gene_symbol"))
-            if annotation.get("hgvs_c"):
-                hgvs_info.append(annotation.get("hgvs_c"))
-            if annotation.get("hgvs_p"):
-                hgvs_info.append(annotation.get("hgvs_p"))
-            
-            if hgvs_info:
-                variant_data["hgvs_val"] = f"hgvs: {', '.join(hgvs_info)}"
-            
-            # Get PMIDs if dbsnp is available
-            snp_id = variant_data["GeneBe_results"][4]
-            if snp_id and snp_id != "Not Available":
-                try:
-                    pmids, pmid_count = get_pmids(snp_id)
-                    variant_data["paper_count"] = pmid_count
-                    return variant_data, pmids
-                except Exception as e:
-                    print(f"Error getting PMIDs: {e}")
-                    return variant_data, None
-        
-        # Still call InterVar API for comparison
-        if not variant_response.lower().startswith("rs"):
-            is_valid, parts = get_variant_info(variant_response)
-            if is_valid:
-                url = "http://wintervar.wglab.org/api_new.php"
-                params = {
-                    "queryType": "position",
-                    "chr": parts[0],
-                    "pos": parts[1],
-                    "ref": parts[2],
-                    "alt": parts[3],
-                    "build": parts[4]
-                }
-
-                response = requests.get(url, params=params)
-                
-                if response.status_code == 200:
-                    try:
-                        results = response.json()
-                        variant_data["InterVar_results"][0] = results.get("Intervar", "Not Available")
-                        variant_data["InterVar_results"][2] = results.get("Gene", "Not Available")
-                    except JSONDecodeError:
-                        pass
-    
+        encoded_gene = urllib.parse.quote(gene_symbol)
     except Exception as e:
-        print(f"Error processing variant with genebe: {e}")
+        print(f"Error encoding gene symbol '{gene_symbol}': {e}")
+        return {}
     
-    return variant_data, None
-
+    for phenotype in phenotypes:
+        if phenotype is None or not str(phenotype).strip():  # Skip None or empty phenotypes
+            continue
+        
+        # Convert phenotype to string and strip whitespace
+        phenotype_str = str(phenotype).strip()
+        
+        try:
+            # Encode the phenotype for the API call
+            encoded_phenotype = urllib.parse.quote(phenotype_str)
+            
+            # Query PubMed API to get count of papers that mention both gene and phenotype
+            url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={encoded_gene}+AND+{encoded_phenotype}&retmode=json&api_key={eutils_api_key}"
+            
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                count = int(data.get('esearchresult', {}).get('count', 0))
+                counts[phenotype_str] = count
+            else:
+                print(f"API request failed with status code: {response.status_code}")
+                counts[phenotype_str] = 0
+                
+        except Exception as e:
+            print(f"Error fetching gene-phenotype papers for '{phenotype_str}': {e}")
+            counts[phenotype_str] = 0
+    
+    # Store the results in session state for future use
+    st.session_state.gene_phenotype_counts[cache_key] = counts
+    
+    return counts
     
 def scrape_papers_for_variant(variant_index, phenotypes, output_filepath=None):
     """Scrape papers for a specific variant with multiple phenotypes"""
@@ -370,6 +343,117 @@ def get_variant_info(message):
         return False, []
 
 
+#get format chrX:123-A>B
+def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
+    # Extract chromosome number from seq_id (e.g., "NC_000022.11" -> 22)
+    match = re.match(r"NC_000(\d+)\.\d+", seq_id)
+    if match:
+        chromosome = int(match.group(1))  # Extracts the chromosome number (e.g., '22')
+        return f"chr{chromosome}:{position}-{deleted_sequence}>{inserted_sequence}"
+    else:
+        return "Invalid format"
+        
+#Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'
+def convert_variant_format(variant: str) -> str:
+    match = re.match(r'chr(\d+):([0-9]+)-([ACGT]+)>([ACGT]*)', variant)
+    if match:
+        chrom, position, ref, alt = match.groups()
+        alt = alt if alt else ""  # Handle cases where alt is missing
+        return f"{chrom},{position},{ref},{alt},hg38"
+    else:
+        raise ValueError("Invalid variant format")
+
+#API call to e-utils for a specific variant
+def snp_to_vcf(snp_id):
+    global eutils_data
+    formatted_alleles = []
+    
+    try:
+        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+        params = {
+            "db": "snp",
+            "id": snp_id.replace("rs", ""),  # Remove 'rs' prefix if present
+            "rettype": "chr",
+            "retmode": "text",
+            "api_key": eutils_api_key
+        }
+        response = requests.get(url, params=params)
+        
+        if response.status_code == 200:
+            try:
+                # Parse XML response
+                from xml.etree import ElementTree as ET
+                eutils_data = response.text
+                
+                # Parse the XML string
+                root = ET.fromstring(eutils_data)
+                
+                # Extract chromosome and position from CHRPOS
+                chrpos_element = root.find(".//CHRPOS")
+                if chrpos_element is not None and chrpos_element.text:
+                    chr_pos = chrpos_element.text.split(':')
+                    if len(chr_pos) == 2:
+                        chromosome = chr_pos[0]
+                        position = chr_pos[1]
+                    else:
+                        st.error(f"Invalid CHRPOS format for {snp_id}")
+                        return []
+                else:
+                    st.error(f"Could not find CHRPOS element for {snp_id}")
+                    return []
+                
+                # Extract reference and alternate alleles from SPDI
+                spdi_element = root.find(".//SPDI")
+                if spdi_element is not None and spdi_element.text:
+                    # SPDI format example: NC_000001.11:230710020:G:A,NC_000001.11:230710020:G:T
+                    spdi_values = spdi_element.text.split(',')
+                    
+                    for spdi in spdi_values:
+                        parts = spdi.split(':')
+                        if len(parts) == 4:
+                            seq_id = parts[0]
+                            pos = int(parts[1])
+                            ref = parts[2]
+                            alt = parts[3]
+                            
+                            # Use the same convert_format function as before
+                            new_format = convert_format(seq_id, pos+1, ref, alt)
+                            if new_format != "Invalid format":
+                                formatted_alleles.append(new_format)
+                
+                return formatted_alleles
+            
+            except Exception as e:
+                st.error(f"Error parsing data for {snp_id}: {str(e)}")
+                return []
+        else:
+            st.error(f"Error: {response.status_code}, Unable to fetch data for {snp_id}")
+            return []
+    except Exception as e:
+        st.error(f"Error processing rs value {snp_id}: {str(e)}")
+        return []
+
+def find_mRNA():
+    global eutils_data
+    for placement in eutils_data["primary_snapshot_data"]["placements_with_allele"]:
+      if "refseq_mrna" in placement["placement_annot"]["seq_type"]:
+        return placement["alleles"][1]["hgvs"]
+    return ""
+
+def find_gene_name():
+    global eutils_data
+    try:
+        genes = eutils_data["primary_snapshot_data"]["allele_annotations"][0]["assembly_annotation"][0]["genes"][0]
+        return genes["locus"]
+    except (KeyError, IndexError):
+        return ""
+
+def find_prot():
+    global eutils_data
+    for placement in eutils_data["primary_snapshot_data"]["placements_with_allele"]:
+      if "refseq_prot" in placement["placement_annot"]["seq_type"]:
+        return placement["alleles"][1]["hgvs"]
+    return ""
 
 # Function to draw table matching gene symbol and HGNC ID
 def draw_gene_match_table(gene_symbol, hgnc_id):
@@ -696,15 +780,48 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
     
     # Process each variant
     all_variants_data = []
-    # Process each variant
-    all_variants_data = []
+    
     for i, variant_response in enumerate(variant_responses):
-        variant_data, pmids = process_variant(variant_response, i)
-        all_variants_data.append(variant_data)
-        if pmids:
-            st.session_state.variant_pmids.append(pmids)
+        # Keep track of the original formatted variants for display
+        st.session_state.all_variants_formatted.append(variant_response)
+        
+        # Handle rs values
+        if variant_response.lower().startswith("rs"):
+            snp_id = variant_response.split()[0]
+            formatted_alleles_result = snp_to_vcf(snp_id)
+            
+            if len(formatted_alleles_result) > 1:
+                # Store variant options for later selection
+                st.session_state.variant_options.append(formatted_alleles_result)
+                # For now, just process the first allele option but will allow selection later
+                variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
+                if pmids:
+                    st.session_state.variant_pmids.append(pmids)
+                else:
+                    st.session_state.variant_pmids.append([])
+                all_variants_data.append(variant_data)
+            else:
+                # Single allele rs variant
+                if formatted_alleles_result:
+                    variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
+                else:
+                    # Invalid or no alleles found
+                    variant_data, pmids = process_variant(variant_response, i)
+                
+                if pmids:
+                    st.session_state.variant_pmids.append(pmids)
+                else:
+                    st.session_state.variant_pmids.append([])
+                all_variants_data.append(variant_data)
         else:
-            st.session_state.variant_pmids.append([])
+            # Direct genomic variant
+            variant_data, pmids = process_variant(variant_response, i)
+            if pmids:
+                st.session_state.variant_pmids.append(pmids)
+            else:
+                st.session_state.variant_pmids.append([])
+            all_variants_data.append(variant_data)
+    
     # Store all variant data
     st.session_state.GeneBe_results = [variant["GeneBe_results"] for variant in all_variants_data]
     st.session_state.InterVar_results = [variant["InterVar_results"] for variant in all_variants_data]
@@ -733,6 +850,32 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
 
 #_______________________________________________________________________________________
 
+# Main interface for variant selection if multiple variants
+if st.session_state.variant_count > 0:
+    variant_options = [f"Variant {i+1}: {st.session_state.all_variants_formatted[i]}" for i in range(st.session_state.variant_count)]
+    
+    # Check if variant_options is not empty before creating selectbox
+    if variant_options:
+        # Make sure the selected_variant_index is in bounds
+        if "selected_variant_index" not in st.session_state or st.session_state.selected_variant_index >= len(variant_options):
+            st.session_state.selected_variant_index = 0
+        
+        # Use the key parameter to track changes without triggering reruns
+        selected_variant = st.selectbox(
+            "Select variant to view:", 
+            variant_options, 
+            index=st.session_state.selected_variant_index,
+            key="variant_selector",
+            on_change=on_variant_select
+        )
+        
+        # Update the index in session state
+        if "variant_selector" in st.session_state:
+            st.session_state.selected_variant_index = variant_options.index(st.session_state.variant_selector)
+        
+    else:
+        st.error("No valid variants were found. Please check your input and try again.")
+    
 
     # If there are variants and phenotypes, show overall summary button
     if st.button("Generate Overall AI Summary"):
