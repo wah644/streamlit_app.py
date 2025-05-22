@@ -2,3 +2,4 @@ groq
 streamlit-arabic-support-wrapper
 paperscraper
 setuptools
+genebe
