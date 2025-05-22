@@ -128,7 +128,8 @@ if "phenotype_paper_matches" not in st.session_state:
     st.session_state.phenotype_paper_matches = {}
 if "gene_phenotype_counts" not in st.session_state:
     st.session_state.gene_phenotype_counts = {}
-    
+
+
 #read gene-disease-curation file
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
 df = pd.read_csv(file_url)
@@ -794,47 +795,46 @@ user_input = ""
 phenotypes = []
 
 # File uploader
-uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
-
-# === ADD THIS BLOCK RIGHT AFTER UPLOADER ===
 if uploaded_file is not None:
-    # Clear previous results (but keep language preference)
-    lang = st.session_state.get("language", "English")
-    st.session_state.clear()
-    st.session_state["language"] = lang
-    
     try:
+        # Clear previous results (but keep language preference)
+        lang = st.session_state.get("language", "English")
+        st.session_state.clear()
+        st.session_state["language"] = lang
+        
+        # Initialize empty lists
+        st.session_state.all_variants_formatted = []
+        st.session_state.variant_pmids = []
+        st.session_state.variant_papers = []
+        st.session_state.phenotype_paper_matches = {}
+        
         html_content = uploaded_file.read().decode("utf-8")
         variants = extract_variants_with_regex(html_content)
         hpo_ids = extract_hpo_ids(html_content)
         
-        # Debug output (optional)
-        st.write(f"Found {len(variants)} variants and {len(hpo_ids)} HPO IDs")
-        
-        if variants:  # Only proceed if variants were found
+        if variants:
             user_input = "\n".join(variants)
             phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
             
-            # Store inputs
             st.session_state.last_input = user_input
             st.session_state.last_input_ph = phenotypes
             
-            # Process variants immediately
+            # Process variants
             with st.spinner("Processing variants..."):
                 assistant_response = get_assistant_response_initial(user_input)
                 variant_responses = [line.strip() for line in assistant_response.split('\n') if line.strip()]
-                variant_responses = variant_responses[:10]  # Limit to 10 variants
-                st.session_state.variant_count = len(variant_responses)
+                st.session_state.variant_count = len(variant_responses[:10])  # Limit to 10
                 
-                # Rest of your processing logic...
-                # (Move all the variant processing code here that was previously after the session state checks)
+                # Store formatted variants
+                st.session_state.all_variants_formatted = variant_responses[:10]
+                
+                # Process each variant (your existing processing code here)
+                # ...
                 
             st.session_state.file_processed = True
         else:
             st.error("No variants found in the uploaded file")
     except Exception as e:
-        st.error(f"Error processing file: {str(e)}")
-# === END OF ADDED BLOCK ===
 
 # Your existing session state checks can remain, but modify them:
 current_input = st.session_state.get("last_input", "")
