@@ -795,51 +795,6 @@ user_input = ""
 phenotypes = []
 
 uploaded_file = st.file_uploader("Upload file", type=["vcf", "txt", "json", "html"])
-
-# Check if a new file is uploaded
-if uploaded_file is not None:
-    try:
-        # Clear previous results (but keep language preference)
-        lang = st.session_state.get("language", "English")
-        st.session_state.clear()
-        st.session_state["language"] = lang
-        
-        # Initialize empty lists
-        st.session_state.all_variants_formatted = []
-        st.session_state.variant_pmids = []
-        st.session_state.variant_papers = []
-        st.session_state.phenotype_paper_matches = {}
-        
-        html_content = uploaded_file.read().decode("utf-8")
-        variants = extract_variants_with_regex(html_content)
-        hpo_ids = extract_hpo_ids(html_content)
-        
-        if variants:
-            user_input = "\n".join(variants)
-            phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
-            
-            st.session_state.last_input = user_input
-            st.session_state.last_input_ph = phenotypes
-            
-            # Process variants
-            with st.spinner("Processing variants..."):
-                assistant_response = get_assistant_response_initial(user_input)
-                variant_responses = [line.strip() for line in assistant_response.split('\n') if line.strip()]
-                st.session_state.variant_count = len(variant_responses[:10])  # Limit to 10
-                
-                # Store formatted variants
-                st.session_state.all_variants_formatted = variant_responses[:10]
-                
-                # Process each variant (your existing processing code here)
-                # ...
-                
-            st.session_state.file_processed = True
-        else:
-            st.error("No variants found in the uploaded file")
-    except Exception as e:
-        st.error(f"Error processing file: {str(e)}")
-        
-
 # Limit to 5 phenotypes
 phenotypes = phenotypes[:20]
 
@@ -863,6 +818,52 @@ if 'last_uploaded_filename' not in st.session_state or st.session_state.last_upl
     st.session_state.phenotype_paper_matches = {}
     if phenotypes != st.session_state.last_input_ph:
         st.session_state.gene_phenotype_counts = {}
+
+    
+    # Check if a new file is uploaded
+    if uploaded_file is not None:
+        try:
+            # Clear previous results (but keep language preference)
+            lang = st.session_state.get("language", "English")
+            st.session_state.clear()
+            st.session_state["language"] = lang
+            
+            # Initialize empty lists
+            st.session_state.all_variants_formatted = []
+            st.session_state.variant_pmids = []
+            st.session_state.variant_papers = []
+            st.session_state.phenotype_paper_matches = {}
+            
+            html_content = uploaded_file.read().decode("utf-8")
+            variants = extract_variants_with_regex(html_content)
+            hpo_ids = extract_hpo_ids(html_content)
+            
+            if variants:
+                user_input = "\n".join(variants)
+                phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+                
+                st.session_state.last_input = user_input
+                st.session_state.last_input_ph = phenotypes
+                
+                # Process variants
+                with st.spinner("Processing variants..."):
+                    assistant_response = get_assistant_response_initial(user_input)
+                    variant_responses = [line.strip() for line in assistant_response.split('\n') if line.strip()]
+                    st.session_state.variant_count = len(variant_responses[:10])  # Limit to 10
+                    
+                    # Store formatted variants
+                    st.session_state.all_variants_formatted = variant_responses[:10]
+                    
+                    # Process each variant (your existing processing code here)
+                    # ...
+                    
+                st.session_state.file_processed = True
+            else:
+                st.error("No variants found in the uploaded file")
+        except Exception as e:
+            st.error(f"Error processing file: {str(e)}")
+            
+
     
     # Get assistant's response for variants
     assistant_response = get_assistant_response_initial(user_input)
