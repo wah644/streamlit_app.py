@@ -11,6 +11,7 @@ from paperscraper.pubmed import get_and_dump_pubmed_papers
 import json
 import os
 import copy
+import genebe as gnb
 
 
 parts = []
