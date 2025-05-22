@@ -368,39 +368,87 @@ def snp_to_vcf(snp_id):
     formatted_alleles = []
 
     try:
-        # Parse the direct format (X-137031256-G-A) instead of using genebe
         if not snp_id:
             print(f"Could not parse variant: {snp_id}")
             return []
 
-        # Handle the direct format input - just validate and return as-is
-        variant_str = snp_id  # Direct input is already in the right format
-
-        # Validate the format by splitting into components
-        try:
-            chrom, pos, ref, alt = variant_str.split('-')
-            pos = int(pos)  # Ensure it's an int
-            
-            # Validate chromosome
-            if not (chrom.isdigit() or chrom.upper() in ['X', 'Y']):
-                print(f"Invalid chromosome: {chrom}")
-                return []
+        # Check if input is rsID (rs200196731) or direct format (X-137031256-G-A)
+        if snp_id.startswith('rs') or (not '-' in snp_id and snp_id.startswith('rs')):
+            # Handle rsID using genebe
+            try:
+                parsed = gnb.parse_variants([snp_id], genome="hg38")
                 
-            # Validate bases
-            valid_bases = set('ACGT')
-            if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
-                print(f"Invalid bases - ref: {ref}, alt: {alt}")
-                return []
+                if not parsed:
+                    print(f"Could not parse variant: {snp_id}")
+                    return []
+
+                # Handle both formats: dict or string
+                if isinstance(parsed[0], dict):
+                    variant_str = parsed[0]['variant']
+                elif isinstance(parsed[0], str):
+                    variant_str = parsed[0]
+                else:
+                    print(f"Unexpected format from parse_variants() for {snp_id}")
+                    return []
+
+                # Now split into components
+                try:
+                    chrom, pos, ref, alt = variant_str.split('-')
+                    pos = int(pos)  # Ensure it's an int
+                except Exception as e:
+                    print(f"Failed to split parsed variant: {e}")
+                    return []
+
+                # Return the variant in the same format as genebe would (X-48684399-C-A)
+                formatted_variant = f"{chrom}-{pos}-{ref.upper()}-{alt.upper()}"
+                formatted_alleles.append(formatted_variant)
+
+                return formatted_alleles
                 
-        except Exception as e:
-            print(f"Failed to split parsed variant: {e}")
-            return []
+            except Exception as e:
+                print(f"Error processing rsID {snp_id}: {e}")
+                return []
+        
+        else:
+            # Handle the direct format input (X-137031256-G-A)
+            variant_str = snp_id
 
-        # Return the variant in the same format as genebe would (X-48684399-C-A)
-        formatted_variant = f"{chrom}-{pos}-{ref.upper()}-{alt.upper()}"
-        formatted_alleles.append(formatted_variant)
+            # Validate the format by splitting into components
+            try:
+                parts = variant_str.split('-')
+                if len(parts) != 4:
+                    print(f"Invalid format: expected 4 parts separated by '-', got {len(parts)}")
+                    return []
+                    
+                chrom, pos, ref, alt = parts
+                pos = int(pos)  # Ensure it's an int
+                
+                # Validate chromosome
+                if not (chrom.isdigit() or chrom.upper() in ['X', 'Y']):
+                    print(f"Invalid chromosome: {chrom}")
+                    return []
+                    
+                # Validate bases
+                valid_bases = set('ACGT')
+                if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
+                    print(f"Invalid bases - ref: {ref}, alt: {alt}")
+                    return []
+                    
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    print(f"Invalid position (must be numeric): {parts[1] if len(parts) > 1 else 'unknown'}")
+                else:
+                    print(f"Failed to parse variant: {e}")
+                return []
+            except Exception as e:
+                print(f"Failed to split parsed variant: {e}")
+                return []
 
-        return formatted_alleles
+            # Return the variant in the same format as genebe would (X-48684399-C-A)
+            formatted_variant = f"{chrom}-{pos}-{ref.upper()}-{alt.upper()}"
+            formatted_alleles.append(formatted_variant)
+
+            return formatted_alleles
 
     except Exception as e:
         print(f"Error processing {snp_id}: {e}")
