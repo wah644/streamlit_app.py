@@ -12,6 +12,8 @@ import json
 import os
 import copy
 import genebe as gnb
+from pathlib import Path
+import obonet
 
 
 parts = []
@@ -173,6 +175,32 @@ if language == "Arabic":
 
 
 #ALL FUNCTIONS
+# === Extract variants from HTML ===
+def extract_variants_with_regex(html_content, max_variants=10):
+    variants = []
+    split_sections = re.split(r'(?i)<b>\s*Variants contributing to score:\s*</b>', html_content)
+    for section in split_sections[1:]:
+        matches = re.findall(r'\b(\d+-\d+-[ACGT]+-[ACGT]+)\b', section)
+        variants.extend(matches)
+        if len(variants) >= max_variants:
+            break
+    return variants[:max_variants]
+
+# === Extract HPO IDs from HTML ===
+def extract_hpo_ids(html_content, max_hpos=20):
+    pre_block = re.search(r'<pre>(.*?)</pre>', html_content, re.DOTALL)
+    if not pre_block:
+        return []
+    hpo_matches = re.findall(r'-\s*&quot;(HP:\d{7})&quot;', pre_block.group(1))
+    return hpo_matches[:max_hpos]
+
+# === Load HPO ontology ===
+print("Loading HPO ontology...")
+graph = obonet.read_obo('http://purl.obolibrary.org/obo/hp.obo')
+
+def get_hpo_name(hpo_id):
+    node = graph.nodes.get(hpo_id)
+    return node.get('name') if node else None
 
 def on_variant_select():
     # This function intentionally left empty - it's just to capture the callback
@@ -759,15 +787,24 @@ st.markdown(
 
 
 # Main Streamlit interactions:
-if language == "English":
-    user_input = st.text_area("Enter genetic variants (enter up to 10 variants, one per line):", height=150)
-else:
-    user_input = st.text_area("أدخل المتغيرات الجينية (أدخل حتى 10 متغيرات، متغير واحد لكل سطر):", height=150)
+uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
 
-if language == "English":
-    user_input_ph = st.text_area("Enter up to 5 phenotypes (one per line):", height=150)
-else:
-    user_input_ph = st.text_area("أدخل حتى 5 أنماط ظاهرية (نمط واحد في كل سطر):", height=150)
+if uploaded_file is not None:
+    html_content = uploaded_file.read().decode("utf-8")
+    
+    # Extract variants and HPO IDs from HTML
+    variants = extract_variants_with_regex(html_content)
+    hpo_ids = extract_hpo_ids(html_content)
+    
+    # Convert to format your app expects
+    user_input = "\n".join(variants)
+    phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+    
+    # Store in session state
+    st.session_state.last_input = user_input
+    st.session_state.last_input_ph = phenotypes
+
+
 
 # Convert user input phenotypes to a list (one per line)
 phenotypes = [p.strip() for p in user_input_ph.split('\n') if p.strip()]
