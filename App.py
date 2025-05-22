@@ -354,15 +354,16 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
         return "Invalid format"
         
 #Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'
-def convert_format(chrom, pos, ref, alt):
-    """Convert from chromosome-position-ref-alt format to desired output format"""
+def convert_variant_format(variant: str) -> str:
+    """Converts a variant from 'X-position-ref-alt' format to 'X,position,ref,alt,hg38'"""
     try:
-        return f"{chrom},{pos},{ref},{alt},hg38"
+        chrom, position, ref, alt = variant.split('-')
+        return f"{chrom},{position},{ref},{alt},hg38"
     except Exception:
-        return "Invalid format"
-
+        raise ValueError("Invalid variant format")
 
 #API call to e-utils for a specific variant
+
 def snp_to_vcf(snp_id):
     formatted_alleles = []
 
@@ -372,33 +373,40 @@ def snp_to_vcf(snp_id):
             print(f"Could not parse variant: {snp_id}")
             return []
 
-        # Handle the direct format input
+        # Handle the direct format input - just validate and return as-is
         variant_str = snp_id  # Direct input is already in the right format
 
-        # Now split into components
+        # Validate the format by splitting into components
         try:
             chrom, pos, ref, alt = variant_str.split('-')
             pos = int(pos)  # Ensure it's an int
+            
+            # Validate chromosome
+            if not (chrom.isdigit() or chrom.upper() in ['X', 'Y']):
+                print(f"Invalid chromosome: {chrom}")
+                return []
+                
+            # Validate bases
+            valid_bases = set('ACGT')
+            if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
+                print(f"Invalid bases - ref: {ref}, alt: {alt}")
+                return []
+                
         except Exception as e:
             print(f"Failed to split parsed variant: {e}")
             return []
 
-        # If you have a convert_format() function, use it:
-        # Example: convert_format(seq_id, pos, ref, alt)
-        try:
-            new_format = convert_format(chrom, pos, ref, alt)
-        except Exception as e:
-            print(f"convert_format() failed: {e}")
-            return []
-
-        if new_format != "Invalid format":
-            formatted_alleles.append(new_format)
+        # Return the variant in the same format as genebe would (X-48684399-C-A)
+        formatted_variant = f"{chrom}-{pos}-{ref.upper()}-{alt.upper()}"
+        formatted_alleles.append(formatted_variant)
 
         return formatted_alleles
 
     except Exception as e:
         print(f"Error processing {snp_id}: {e}")
         return []
+
+
 
 def find_mRNA():
     global eutils_data
