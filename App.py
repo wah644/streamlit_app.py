@@ -11,7 +11,6 @@ from paperscraper.pubmed import get_and_dump_pubmed_papers
 import json
 import os
 import copy
-import genebe as gnb
 
 
 parts = []
@@ -354,56 +353,79 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
     else:
         return "Invalid format"
         
+#Converts a variant from 'chr#:position-ref>alt' format to '#,position,ref,alt,hg38'
+def convert_format(seq_id, pos, ref, alt):
+    """Convert from sequence ID format to desired output format"""
+    try:
+        # Extract chromosome from seq_id (simplified)
+        if "NC_" in seq_id:
+            # Extract chromosome number from NC format
+            chrom_part = seq_id.split('.')[0].replace('NC_', '').replace('000', '')
+            if chrom_part.startswith('00'):
+                chrom = chrom_part[2:].lstrip('0') or '1'
+            else:
+                chrom = chrom_part.lstrip('0') or '1'
+        else:
+            chrom = "1"  # Default fallback
+            
+        return f"{chrom},{pos},{ref},{alt},hg38"
+    except Exception:
+        return "Invalid format"
 
 
 #API call to e-utils for a specific variant
-
-
-
-
 def snp_to_vcf(snp_id):
+    global eutils_data
     formatted_alleles = []
     
     try:
+        # Parse the direct format instead of API call
+        eutils_data = f"Direct parsing of {snp_id}"
+        
         # Split by hyphen to get components
         parts = snp_id.split('-')
         
         if len(parts) != 4:
-            print(f"Invalid format: {snp_id}. Expected format: X-137031256-G-A")
-            return formatted_alleles
+            st.error(f"Invalid format: {snp_id}. Expected format: X-137031256-G-A")
+            return []
             
-        chrom, position, ref, alt = parts
+        chromosome, position, ref, alt = parts
         
         # Convert chromosome format if needed
-        # X, Y stay as is, numbers stay as is
-        if chrom.isdigit():
-            chrom = chrom  # Keep numeric chromosomes as is
-        elif chrom.upper() in ['X', 'Y']:
-            chrom = chrom.upper()  # Ensure X, Y are uppercase
+        if chromosome.isdigit():
+            chromosome = chromosome  # Keep numeric chromosomes as is
+        elif chromosome.upper() in ['X', 'Y']:
+            chromosome = chromosome.upper()  # Ensure X, Y are uppercase
         else:
-            print(f"Invalid chromosome: {chrom}")
-            return formatted_alleles
+            st.error(f"Invalid chromosome: {chromosome}")
+            return []
             
         # Validate position is numeric
         if not position.isdigit():
-            print(f"Invalid position: {position}")
-            return formatted_alleles
+            st.error(f"Invalid position: {position}")
+            return []
             
         # Validate ref and alt are valid DNA bases
         valid_bases = set('ACGT')
         if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
-            print(f"Invalid bases - ref: {ref}, alt: {alt}")
-            return formatted_alleles
-            
-        formatted = f"{chrom},{position},{ref.upper()},{alt.upper()},hg38"
-        formatted_alleles.append(formatted)
+            st.error(f"Invalid bases - ref: {ref}, alt: {alt}")
+            return []
+        
+        # Create SPDI-like format for processing (simulating the original logic)
+        # Using position-1 to match SPDI 0-based indexing, then adding 1 back in convert_format
+        pos = int(position) - 1
+        seq_id = f"NC_00000{chromosome.zfill(2)}.11"  # Simulate sequence ID
+        
+        # Use the same convert_format function as before
+        new_format = convert_format(seq_id, pos+1, ref.upper(), alt.upper())
+        if new_format != "Invalid format":
+            formatted_alleles.append(new_format)
         
         return formatted_alleles
         
     except Exception as e:
-        print(f"Error processing {snp_id}: {e}")
-        return formatted_alleles
-
+        st.error(f"Error processing rs value {snp_id}: {str(e)}")
+        return []
 
 def find_mRNA():
     global eutils_data
@@ -761,19 +783,30 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
         if variant_response.lower().startswith("rs"):
             snp_id = variant_response.split()[0]
             formatted_alleles_result = snp_to_vcf(snp_id)
-    
+            
+            if len(formatted_alleles_result) > 1:
+                # Store variant options for later selection
+                st.session_state.variant_options.append(formatted_alleles_result)
+                # For now, just process the first allele option but will allow selection later
+                variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
+                if pmids:
+                    st.session_state.variant_pmids.append(pmids)
+                else:
+                    st.session_state.variant_pmids.append([])
+                all_variants_data.append(variant_data)
+            else:
                 # Single allele rs variant
-            if formatted_alleles_result:
-                variant_data, pmids = process_variant(formatted_alleles_result[0], i)
-            else:
+                if formatted_alleles_result:
+                    variant_data, pmids = process_variant(convert_variant_format(formatted_alleles_result[0]), i)
+                else:
                     # Invalid or no alleles found
-                variant_data, pmids = process_variant(variant_response, i)
+                    variant_data, pmids = process_variant(variant_response, i)
                 
-            if pmids:
-                st.session_state.variant_pmids.append(pmids)
-            else:
-                st.session_state.variant_pmids.append([])
-            all_variants_data.append(variant_data)
+                if pmids:
+                    st.session_state.variant_pmids.append(pmids)
+                else:
+                    st.session_state.variant_pmids.append([])
+                all_variants_data.append(variant_data)
         else:
             # Direct genomic variant
             variant_data, pmids = process_variant(variant_response, i)
