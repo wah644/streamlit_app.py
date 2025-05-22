@@ -128,6 +128,8 @@ if "phenotype_paper_matches" not in st.session_state:
     st.session_state.phenotype_paper_matches = {}
 if "gene_phenotype_counts" not in st.session_state:
     st.session_state.gene_phenotype_counts = {}
+if 'last_uploaded_filename' not in st.session_state:
+    st.session_state.last_uploaded_filename = ""
 
 
 #read gene-disease-curation file
@@ -798,7 +800,7 @@ uploaded_file = st.file_uploader("Upload file", type=["vcf", "txt", "json", "htm
 # Limit to 5 phenotypes
 phenotypes = phenotypes[:20]
 
-if uploaded_file is not None and 'last_uploaded_filename' not in st.session_state or st.session_state.last_uploaded_filename != uploaded_file.name:
+if uploaded_file is not None and st.session_state.last_uploaded_filename != uploaded_file.name:
         
         # New file uploaded — reset relevant state
     st.session_state.last_uploaded_filename = uploaded_file.name
