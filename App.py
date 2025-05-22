@@ -362,13 +362,15 @@ def convert_format(seq_id, position, deleted_sequence, inserted_sequence):
 
 
 def snp_to_vcf(snp_id):
+    formatted_alleles = []
+    
     try:
         # Split by hyphen to get components
         parts = snp_id.split('-')
         
         if len(parts) != 4:
             print(f"Invalid format: {snp_id}. Expected format: X-137031256-G-A")
-            return None
+            return formatted_alleles
             
         chrom, position, ref, alt = parts
         
@@ -380,27 +382,27 @@ def snp_to_vcf(snp_id):
             chrom = chrom.upper()  # Ensure X, Y are uppercase
         else:
             print(f"Invalid chromosome: {chrom}")
-            return None
+            return formatted_alleles
             
         # Validate position is numeric
         if not position.isdigit():
             print(f"Invalid position: {position}")
-            return None
+            return formatted_alleles
             
         # Validate ref and alt are valid DNA bases
         valid_bases = set('ACGT')
         if not (set(ref.upper()).issubset(valid_bases) and set(alt.upper()).issubset(valid_bases)):
             print(f"Invalid bases - ref: {ref}, alt: {alt}")
-            return None
+            return formatted_alleles
             
         formatted = f"{chrom},{position},{ref.upper()},{alt.upper()},hg38"
-        return formatted
+        formatted_alleles.append(formatted)
+        
+        return formatted_alleles
         
     except Exception as e:
         print(f"Error processing {snp_id}: {e}")
-        return None
-
-# Example run
+        return formatted_alleles
 
 
 def find_mRNA():
