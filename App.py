@@ -837,6 +837,7 @@ if uploaded_file is not None:
         else:
             st.error("No variants found in the uploaded file")
     except Exception as e:
+        continue
 
 # Your existing session state checks can remain, but modify them:
 current_input = st.session_state.get("last_input", "")
