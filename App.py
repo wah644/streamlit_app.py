@@ -799,8 +799,6 @@ phenotypes = []
 uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["vcf", "txt", "json", "html"])
 
 if uploaded_file is not None and st.session_state.get("last_uploaded_filename") != uploaded_file.name:
-    st.write(st.session_state.last_uploaded_filename)
-    st.write(uploaded_file.name)
         # New file uploaded — reset relevant state
     st.session_state.last_uploaded_filename = uploaded_file.name
     # Reset data when input changes
