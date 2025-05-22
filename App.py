@@ -838,7 +838,7 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
             # Limit to 5 phenotypes
             phenotypes = phenotypes[:20]
                 
-             st.session_state.phenotypes = phenotypes
+            st.session_state.phenotypes = phenotypes
                 
                 # Process variants
             with st.spinner("Processing variants..."):
