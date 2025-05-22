@@ -785,9 +785,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Main Streamlit interactions:
+# Add this near the top of your main interface (after language selection)
 uploaded_file = st.file_uploader("Upload HTML file with variant data", type=["html"])
+
+# Initialize phenotypes as empty list
+phenotypes = []
 
 if uploaded_file is not None:
     html_content = uploaded_file.read().decode("utf-8")
@@ -803,11 +809,14 @@ if uploaded_file is not None:
     # Store in session state
     st.session_state.last_input = user_input
     st.session_state.last_input_ph = phenotypes
+else:
+    # If no file uploaded, ensure phenotypes is empty
+    phenotypes = []
+    st.session_state.last_input_ph = []
 
 
-
-# Convert user input phenotypes to a list (one per line)
-phenotypes = [p.strip() for p in user_input_ph.split('\n') if p.strip()]
+# Get phenotypes from session state if available
+phenotypes = st.session_state.get("last_input_ph", [])
 # Limit to 5 phenotypes
 phenotypes = phenotypes[:20]
 
