@@ -183,39 +183,69 @@ def get_gene_phenotype_paper_counts(gene_symbol, phenotypes):
     Returns a dictionary with phenotype as key and paper count as value
     Uses session state to cache results and avoid redundant API calls
     """
+    # Validate and convert gene_symbol to string
+    if gene_symbol is None:
+        print("Warning: gene_symbol is None")
+        return {}
+    
+    # Convert to string and strip whitespace
+    gene_symbol = str(gene_symbol).strip()
+    
+    if not gene_symbol:
+        print("Warning: gene_symbol is empty after conversion")
+        return {}
+    
+    # Validate phenotypes
+    if not phenotypes:
+        print("Warning: phenotypes list is empty or None")
+        return {}
+    
     # Create a unique key for this gene-phenotypes combination
-    cache_key = f"{gene_symbol}_{'_'.join(sorted(phenotypes))}"
+    cache_key = f"{gene_symbol}_{'_'.join(sorted([str(p) for p in phenotypes if p is not None]))}"
     
     # Check if we already have the results in session state
-    if cache_key in st.session_state.gene_phenotype_counts:
+    if hasattr(st.session_state, 'gene_phenotype_counts') and cache_key in st.session_state.gene_phenotype_counts:
         return st.session_state.gene_phenotype_counts[cache_key]
+    
+    # Initialize the cache if it doesn't exist
+    if not hasattr(st.session_state, 'gene_phenotype_counts'):
+        st.session_state.gene_phenotype_counts = {}
     
     counts = {}
     
     # Encode the gene symbol properly for the API call
-    encoded_gene = urllib.parse.quote(gene_symbol)
+    try:
+        encoded_gene = urllib.parse.quote(gene_symbol)
+    except Exception as e:
+        print(f"Error encoding gene symbol '{gene_symbol}': {e}")
+        return {}
     
     for phenotype in phenotypes:
-        if not phenotype.strip():  # Skip empty phenotypes
+        if phenotype is None or not str(phenotype).strip():  # Skip None or empty phenotypes
             continue
-            
-        # Encode the phenotype for the API call
-        encoded_phenotype = urllib.parse.quote(phenotype)
         
-        # Query PubMed API to get count of papers that mention both gene and phenotype
-        url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={encoded_gene}+AND+{encoded_phenotype}&retmode=json&api_key={eutils_api_key}"
+        # Convert phenotype to string and strip whitespace
+        phenotype_str = str(phenotype).strip()
         
         try:
+            # Encode the phenotype for the API call
+            encoded_phenotype = urllib.parse.quote(phenotype_str)
+            
+            # Query PubMed API to get count of papers that mention both gene and phenotype
+            url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={encoded_gene}+AND+{encoded_phenotype}&retmode=json&api_key={eutils_api_key}"
+            
             response = requests.get(url)
             if response.status_code == 200:
                 data = response.json()
                 count = int(data.get('esearchresult', {}).get('count', 0))
-                counts[phenotype] = count
+                counts[phenotype_str] = count
             else:
-                counts[phenotype] = 0
+                print(f"API request failed with status code: {response.status_code}")
+                counts[phenotype_str] = 0
+                
         except Exception as e:
-            print(f"Error fetching gene-phenotype papers: {e}")
-            counts[phenotype] = 0
+            print(f"Error fetching gene-phenotype papers for '{phenotype_str}': {e}")
+            counts[phenotype_str] = 0
     
     # Store the results in session state for future use
     st.session_state.gene_phenotype_counts[cache_key] = counts
