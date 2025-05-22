@@ -793,6 +793,7 @@ st.markdown(
 # Initialize variables
 user_input = ""
 phenotypes = []
+uploaded_file.name = ""
 
 uploaded_file = st.file_uploader("Upload file", type=["vcf", "txt", "json", "html"])
 # Limit to 5 phenotypes
