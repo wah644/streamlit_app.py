@@ -933,30 +933,24 @@ if (user_input != st.session_state.last_input or phenotypes != st.session_state.
 #_______________________________________________________________________________________
 
 # Main interface for variant selection if multiple variants
-if st.session_state.variant_count > 0:
-    variant_options = [f"Variant {i+1}: {st.session_state.all_variants_formatted[i]}" for i in range(st.session_state.variant_count)]
+# Main interface for variant selection
+if st.session_state.get('variant_count', 0) > 0:
+    # Create options safely
+    variant_options = [
+        f"Variant {i+1}: {variant}" 
+        for i, variant in enumerate(st.session_state.get('all_variants_formatted', []))
+    ]
     
-    # Check if variant_options is not empty before creating selectbox
-    if variant_options:
-        # Make sure the selected_variant_index is in bounds
-        if "selected_variant_index" not in st.session_state or st.session_state.selected_variant_index >= len(variant_options):
-            st.session_state.selected_variant_index = 0
-        
-        # Use the key parameter to track changes without triggering reruns
+    if variant_options:  # Only show if we have options
         selected_variant = st.selectbox(
             "Select variant to view:", 
-            variant_options, 
-            index=st.session_state.selected_variant_index,
-            key="variant_selector",
-            on_change=on_variant_select
+            variant_options,
+            key="variant_selector"
         )
         
-        # Update the index in session state
-        if "variant_selector" in st.session_state:
-            st.session_state.selected_variant_index = variant_options.index(st.session_state.variant_selector)
-        
+        # Rest of your display logic...
     else:
-        st.error("No valid variants were found. Please check your input and try again.")
+        st.warning("No variants available for selection")
     
 
     # If there are variants and phenotypes, show overall summary button
