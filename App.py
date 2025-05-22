@@ -130,7 +130,8 @@ if "gene_phenotype_counts" not in st.session_state:
     st.session_state.gene_phenotype_counts = {}
 if 'last_uploaded_filename' not in st.session_state:
     st.session_state.last_uploaded_filename = ""
-
+if "file_processed" not in st.session_state:
+    st.session_state.file_processed = False
 
 #read gene-disease-curation file
 file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
@@ -798,8 +799,11 @@ phenotypes = []
 
 uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["vcf", "txt", "json", "html"])
 
-if uploaded_file is not None and st.session_state.get("last_uploaded_filename") != uploaded_file.name:
+# Only process if it's a NEW file or if no processing has been done yet
+if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename") != uploaded_file.name or not st.session_state.get("file_processed", False))):
+    # Your existing processing code goes here...
         # New file uploaded — reset relevant state
+    st.session_state.file_processed = True
     st.session_state.last_uploaded_filename = uploaded_file.name
     # Reset data when input changes
     st.session_state.last_input = user_input
@@ -815,6 +819,7 @@ if uploaded_file is not None and st.session_state.get("last_uploaded_filename") 
     st.session_state.all_variants_formatted = []
     st.session_state.variant_options = []
     st.session_state.phenotype_paper_matches = {}
+    st.session_state.variant_count = 0
     if phenotypes != st.session_state.last_input_ph:
         st.session_state.gene_phenotype_counts = {}
 
@@ -822,16 +827,6 @@ if uploaded_file is not None and st.session_state.get("last_uploaded_filename") 
     # Check if a new file is uploaded
 
     try:
-            # Clear previous results (but keep language preference)
-        lang = st.session_state.get("language", "English")
-        st.session_state.clear()
-        st.session_state["language"] = lang
-            
-            # Initialize empty lists
-        st.session_state.all_variants_formatted = []
-        st.session_state.variant_pmids = []
-        st.session_state.variant_papers = []
-        st.session_state.phenotype_paper_matches = {}
             
         html_content = uploaded_file.read().decode("utf-8")
         variants = extract_variants_with_regex(html_content)
