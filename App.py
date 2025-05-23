@@ -187,7 +187,7 @@ def extract_variants_with_regex(html_content, max_variants=10):
     variants = []
     split_sections = re.split(r'(?i)<b>\s*Variants contributing to score:\s*</b>', html_content)
     for section in split_sections[1:]:
-        matches = re.findall(r'\b(\d+-\d+-[ACGT]+-[ACGT]+)\b', section)
+        matches = re.findall(r'\b([XY\d]+-\d+-[ACGT]+-[ACGT]+)\b', section)
         variants.extend(matches)
         if len(variants) >= max_variants:
             break
@@ -847,7 +847,6 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
                 st.session_state.variant_count = len(variant_responses[:10])  # Limit to 10
                     
                     # Store formatted variants
-                st.session_state.all_variants_formatted = variant_responses[:10]
                     
                     # Process each variant (your existing processing code here)
                     # ...
