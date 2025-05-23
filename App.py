@@ -185,12 +185,24 @@ if language == "Arabic":
 # === Extract variants from HTML ===
 def extract_variants_with_regex(html_content, max_variants=10):
     variants = []
-    split_sections = re.split(r'(?i)<b>\s*Variants contributing to score:\s*</b>', html_content)
-    for section in split_sections[1:]:
+    
+    # Split on "Variants contributing to score:" to get the relevant section
+    split_sections = re.split(r'(?i)\*\*\s*Variants contributing to score:\s*\*\*', html_content)
+    
+    for section in split_sections[1:]:  # Skip the first section (before the split pattern)
+        # Stop processing when we reach "Other passed variants:" section
+        other_variants_match = re.search(r'(?i)\*\*\s*Other passed variants:\s*\*\*', section)
+        if other_variants_match:
+            # Only process the part before "Other passed variants:"
+            section = section[:other_variants_match.start()]
+        
+        # Extract variant patterns from the section
         matches = re.findall(r'\b([XY\d]+-\d+-[ACGT]+-[ACGT]+)\b', section)
         variants.extend(matches)
+        
         if len(variants) >= max_variants:
             break
+    
     return variants[:max_variants]
 
 # === Extract HPO IDs from HTML ===
