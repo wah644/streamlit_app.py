@@ -668,8 +668,8 @@ if language == "Arabic":
 def get_assistant_response_1(user_input):
     full_message = SYSTEM_1 + [{"role": "user", "content": user_input}]
     completion = client.chat.completions.create(
-        #model="llama-3.3-70b-versatile",
-        model="deepseek-r1-distill-llama-70b",
+        model="llama-3.3-70b-versatile",
+        #model="deepseek-r1-distill-llama-70b",
         messages=full_message,
         temperature=temp_val,
         max_completion_tokens=2048,
