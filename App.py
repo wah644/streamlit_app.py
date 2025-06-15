@@ -812,19 +812,17 @@ st.markdown(
 # Initialize variables
 # Main Streamlit interactions:
 # Initialize variables
-# Main Streamlit interactions:
-# Initialize variables
 user_input = ""
 phenotypes = st.session_state.phenotypes
 
 # Add manual text input section
 if language == "English":
-    manual_user_input = st.text_area("Enter variants ex: rs1228544607 or chr6:160585140-T>G (one per line):", height=150)
+    manual_user_input = st.text_area("Enter genetic variants manually (enter up to 10 variants, one per line):", height=150)
 else:
     manual_user_input = st.text_area("أدخل المتغيرات الجينية (أدخل حتى 10 متغيرات، متغير واحد لكل سطر):", height=150)
 
 if language == "English":
-    user_input_ph = st.text_area("Enter phenotypes (one per line):", height=150)
+    user_input_ph = st.text_area("Enter up to 5 phenotypes (one per line):", height=150)
 else:
     user_input_ph = st.text_area("أدخل حتى 5 أنماط ظاهرية (نمط واحد في كل سطر):", height=150)
 
@@ -841,11 +839,21 @@ if 'file_variants' not in st.session_state:
 if 'file_phenotypes' not in st.session_state:
     st.session_state.file_phenotypes = []
 
+# Check if file was removed or changed
+current_filename = uploaded_file.name if uploaded_file is not None else None
+last_filename = st.session_state.get("last_uploaded_filename", None)
+
+# Reset file data if file was removed or changed
+if current_filename != last_filename:
+    st.session_state.file_variants = []
+    st.session_state.file_phenotypes = []
+    st.session_state.file_processed = False
+    st.session_state.last_uploaded_filename = current_filename
+
 # Only process if it's a NEW file or if no processing has been done yet
-if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename") != uploaded_file.name or not st.session_state.get("file_processed", False))):
-    # New file uploaded — reset relevant state
+if (uploaded_file is not None and not st.session_state.get("file_processed", False)):
+    # New file uploaded — process it
     st.session_state.file_processed = True
-    st.session_state.last_uploaded_filename = uploaded_file.name
     
     try:
         html_content = uploaded_file.read().decode("utf-8")
@@ -1004,6 +1012,8 @@ if (user_input != st.session_state.get('last_input', '') or phenotypes != st.ses
             else:
                 st.session_state.variant_papers.append([])
                 st.session_state.phenotype_paper_matches[i] = {}
+
+# Rest of your existing code remains exactly the same from here...
 #_______________________________________________________________________________________
 
 # Main interface for variant selection if multiple variants
