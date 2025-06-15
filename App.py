@@ -810,18 +810,98 @@ st.markdown(
 
 # Main Streamlit interactions:
 # Initialize variables
+# Main Streamlit interactions:
+# Initialize variables
 user_input = ""
 phenotypes = st.session_state.phenotypes
 
+# Add manual text input section (from your old code)
+if language == "English":
+    manual_user_input = st.text_area("Enter genetic variants manually (enter up to 10 variants, one per line):", height=150)
+else:
+    manual_user_input = st.text_area("أدخل المتغيرات الجينية (أدخل حتى 10 متغيرات، متغير واحد لكل سطر):", height=150)
+
+if language == "English":
+    user_input_ph = st.text_area("Enter up to 5 phenotypes (one per line):", height=150)
+else:
+    user_input_ph = st.text_area("أدخل حتى 5 أنماط ظاهرية (نمط واحد في كل سطر):", height=150)
+
+# Convert user input phenotypes to a list (one per line)
+manual_phenotypes = [p.strip() for p in user_input_ph.split('\n') if p.strip()]
+# Limit to 5 phenotypes
+manual_phenotypes = manual_phenotypes[:20]
+
 uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["vcf", "txt", "json", "html"])
 
-# Only process if it's a NEW file or if no processing has been done yet
+# Combine variants from both sources
+combined_variants = []
+combined_phenotypes = []
+
+# Process manual input first
+if manual_user_input.strip():
+    manual_variants = [v.strip() for v in manual_user_input.split('\n') if v.strip()]
+    combined_variants.extend(manual_variants)
+
+# Add manual phenotypes
+if manual_phenotypes:
+    combined_phenotypes.extend(manual_phenotypes)
+
+# Process file upload
+file_variants = []
+file_phenotypes = []
+
 if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename") != uploaded_file.name or not st.session_state.get("file_processed", False))):
-    # Your existing processing code goes here...
-        # New file uploaded — reset relevant state
-    st.session_state.file_processed = True
-    st.session_state.last_uploaded_filename = uploaded_file.name
+    try:
+        html_content = uploaded_file.read().decode("utf-8")
+        file_variants = extract_variants_with_regex(html_content)
+        hpo_ids = extract_hpo_ids(html_content)
+        
+        if file_variants:
+            combined_variants.extend(file_variants)
+            
+        if hpo_ids:
+            file_phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
+            # Limit to 20 phenotypes
+            file_phenotypes = file_phenotypes[:20]
+            combined_phenotypes.extend(file_phenotypes)
+            
+        st.session_state.file_processed = True
+        st.session_state.last_uploaded_filename = uploaded_file.name
+        
+    except Exception as e:
+        st.error(f"Error processing file: {str(e)}")
+
+# Remove duplicates while preserving order
+seen_variants = set()
+unique_variants = []
+for variant in combined_variants:
+    if variant not in seen_variants:
+        seen_variants.add(variant)
+        unique_variants.append(variant)
+
+seen_phenotypes = set()
+unique_phenotypes = []
+for phenotype in combined_phenotypes:
+    if phenotype not in seen_phenotypes:
+        seen_phenotypes.add(phenotype)
+        unique_phenotypes.append(phenotype)
+
+# Convert to the format expected by your existing code
+user_input = "\n".join(unique_variants)
+phenotypes = unique_phenotypes
+
+# Check if we have any input to process (either manual or file)
+input_changed = (
+    user_input != st.session_state.get('last_input', '') or 
+    phenotypes != st.session_state.get('last_input_ph', []) or
+    (uploaded_file is not None and st.session_state.get("last_uploaded_filename") != uploaded_file.name)
+)
+
+# Only process if there's new input
+if input_changed and (user_input.strip() or phenotypes):
     # Reset data when input changes
+    st.session_state.last_input = user_input
+    st.session_state.last_input_ph = phenotypes
     st.session_state.GeneBe_results = []
     st.session_state.InterVar_results = []
     st.session_state.disease_classification_dict = []
@@ -835,42 +915,15 @@ if (uploaded_file is not None and (st.session_state.get("last_uploaded_filename"
     st.session_state.phenotype_paper_matches = {}
     st.session_state.variant_count = 0
     st.session_state.gene_phenotype_counts = {}
+    st.session_state.phenotypes = phenotypes
 
-    
-    # Check if a new file is uploaded
-
-    try:
-            
-        html_content = uploaded_file.read().decode("utf-8")
-        variants = extract_variants_with_regex(html_content)
-        hpo_ids = extract_hpo_ids(html_content)
-            
-        if variants:
-            user_input = "\n".join(variants)
-            phenotypes = [get_hpo_name(hpo_id) for hpo_id in hpo_ids if get_hpo_name(hpo_id)]
-            # Limit to 5 phenotypes
-            phenotypes = phenotypes[:20]
-                
-            st.session_state.phenotypes = phenotypes
-                
-                # Process variants
-            with st.spinner("Processing variants..."):
-                assistant_response = get_assistant_response_initial(user_input)
-                variant_responses = [line.strip() for line in assistant_response.split('\n') if line.strip()]
-                st.session_state.variant_count = len(variant_responses[:10])  # Limit to 10
-                    
-                    # Store formatted variants
-                    
-                    # Process each variant (your existing processing code here)
-                    # ...
-                    
-            st.session_state.file_processed = True
-        else:
-            st.error("No variants found in the uploaded file")
-    except Exception as e:
-        st.error(f"Error processing file: {str(e)}")
-            
-
+    # Show what sources contributed variants
+    if manual_user_input.strip() and file_variants:
+        st.info(f"Processing {len([v.strip() for v in manual_user_input.split('\n') if v.strip()])} manual variants and {len(file_variants)} variants from uploaded file.")
+    elif manual_user_input.strip():
+        st.info(f"Processing {len([v.strip() for v in manual_user_input.split('\n') if v.strip()])} manual variants.")
+    elif file_variants:
+        st.info(f"Processing {len(file_variants)} variants from uploaded file.")
     
     # Get assistant's response for variants
     assistant_response = get_assistant_response_initial(user_input)
