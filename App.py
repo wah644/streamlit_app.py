@@ -810,19 +810,18 @@ st.markdown(
 
 # Main Streamlit interactions:
 # Initialize variables
-# Main Streamlit interactions:
-# Initialize variables
+
 user_input = ""
 phenotypes = st.session_state.phenotypes
 
 # Add manual text input section
 if language == "English":
-    manual_user_input = st.text_area("Enter genetic variants manually (enter up to 10 variants, one per line):", height=150)
+    manual_user_input = st.text_area("Enter variants ex: rs1228544607 or chr6:160585140-T>G (one per line):", height=150)
 else:
     manual_user_input = st.text_area("أدخل المتغيرات الجينية (أدخل حتى 10 متغيرات، متغير واحد لكل سطر):", height=150)
 
 if language == "English":
-    user_input_ph = st.text_area("Enter up to 5 phenotypes (one per line):", height=150)
+    user_input_ph = st.text_area("Enter phenotypes (one per line):", height=150)
 else:
     user_input_ph = st.text_area("أدخل حتى 5 أنماط ظاهرية (نمط واحد في كل سطر):", height=150)
 
@@ -1013,7 +1012,6 @@ if (user_input != st.session_state.get('last_input', '') or phenotypes != st.ses
                 st.session_state.variant_papers.append([])
                 st.session_state.phenotype_paper_matches[i] = {}
 
-# Rest of your existing code remains exactly the same from here...
 #_______________________________________________________________________________________
 
 # Main interface for variant selection if multiple variants
