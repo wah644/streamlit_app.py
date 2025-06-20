@@ -4,8 +4,7 @@ import requests
 from groq import Groq
 import pandas as pd
 import re
-from arabic_reshaper import reshape
-from bidi.algorithm import get_display
+from arabic_support import support_arabic_text
 from PIL import Image
 import urllib.parse
 from paperscraper.pubmed import get_and_dump_pubmed_papers
@@ -15,8 +14,6 @@ import copy
 import genebe as gnb
 from pathlib import Path
 import obonet
-from cyvcf2 import VCF
-import subprocess
 
 
 parts = []
@@ -31,12 +28,12 @@ temp_ara = 0.5
 top_p_ara = 0.8
 
 
-#im = Image.open("dxvaricon.ico")
-#st.set_page_config(
-   # page_title="DxVar",
-    #page_icon=im,
-    #layout="centered"
-#)
+im = Image.open("dxvaricon.ico")
+st.set_page_config(
+    page_title="DxVar",
+    page_icon=im,
+    layout="centered"
+)
 
 st.markdown("""
     <style>
@@ -50,8 +47,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-#logo_url = "DxVar Logo.png"
-#st.image(logo_url, width=300)
+logo_url = "DxVar Logo.png"
+st.image(logo_url, width=300)
 #st.title("DxVar")
 
 
@@ -63,7 +60,7 @@ st.session_state["language"] = language
 
 # Support Arabic text alignment in all components
 if language == "Arabic":
-    
+    support_arabic_text(all=True)
     temp_val = temp_ara
     top_p_val = top_p_ara
 else:
@@ -137,17 +134,10 @@ if "file_processed" not in st.session_state:
     st.session_state.file_processed = False
 if "phenotypes" not in st.session_state:
     st.session_state.phenotypes = []
-if "yaml_ready" not in st.session_state:
-    st.session_state.yaml_ready = False
-if "yaml_path" not in st.session_state:
-    st.session_state.yaml_path = ""
-if "exomiser_html_path" not in st.session_state:
-    st.session_state.exomiser_html_path = None
-if "exomiser_auto_upload" not in st.session_state:
-    st.session_state.exomiser_auto_upload = False
+
 
 #read gene-disease-curation file
-file_url = 'https://raw.githubusercontent.com/wah644/streamlit_app.py/main/Clingen-Gene-Disease-Summary-2025-01-03.csv'
+file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
 df = pd.read_csv(file_url)
 
 # Define the initial system message for variant input formatting
@@ -824,210 +814,7 @@ st.markdown(
 user_input = ""
 phenotypes = st.session_state.phenotypes
 
-if "input_choice" not in st.session_state:
-    st.session_state.input_choice = "Upload Exomiser HTML report"
-input_choice = st.radio(
-    "Choose how to start your analysis:",
-    ["Upload Exomiser HTML report", "Run Exomiser using VCF"],
-    index=0 if st.session_state.input_choice == "Upload Exomiser HTML report" else 1,
-    key="input_choice",
-)
-
-uploaded_file = None
-
-# --- Exomiser Pipeline ---------------------------------------------------
-if input_choice == "Run Exomiser using VCF":
-    st.header("VCF ➔ PED + YAML Generator (Exomiser Pipeline)")
-    vcf_file = st.file_uploader(
-        "\U0001F4C1 Upload your VCF or VCF.GZ file",
-        type=["vcf", "vcf.gz"],
-        key="vcf_uploader",
-    )
-    sample_names = []
-    vcf_path = ""
-    ped_file_path = ""
-    file_ext = ""
-    
-    def is_gzipped(file_path):
-        with open(file_path, 'rb') as f_in:
-            return f_in.read(2) == b'\x1f\x8b'
-
-    if vcf_file:
-        file_ext = ".vcf.gz" if vcf_file.name.endswith(".gz") else ".vcf"
-        vcf_path = "uploaded_temp" + file_ext
-        with open(vcf_path, "wb") as f:
-            f.write(vcf_file.read())
-
-        if file_ext == ".vcf.gz" and not is_gzipped(vcf_path):
-            st.error("❌ The uploaded file ends in .gz but is not actually gzipped.")
-        else:
-            try:
-                vcf = VCF(vcf_path)
-                sample_names = [s.strip() for s in vcf.samples]
-                st.success(f"✅ Found {len(sample_names)} samples: {', '.join(sample_names)}")
-            except Exception as e:
-                st.error(f"❌ Could not read VCF: {e}")
-
-    ped_rows = []
-    proband_list = []
-    if sample_names:
-        st.markdown("### 👤 Define Individuals (Sex, Affected, Parents)")
-        for sample in sample_names:
-            st.markdown(f"#### 🧬 {sample}")
-            col1, col2, col3, col4 = st.columns([1.2, 1.2, 2, 2])
-            with col1:
-                selected_sex = st.radio("Sex", ["Male", "Female", "Unknown"], key=f"sex_{sample}", horizontal=True)
-            with col2:
-                selected_aff = st.radio("Affected", ["Affected", "Unaffected", "Unknown"], key=f"aff_{sample}", horizontal=True)
-            with col3:
-                father = st.selectbox("Father", ["None"] + sample_names, key=f"father_{sample}")
-            with col4:
-                mother = st.selectbox("Mother", ["None"] + sample_names, key=f"mother_{sample}")
-    
-            sex_code = {"Male": "1", "Female": "2", "Unknown": "0"}[selected_sex]
-            aff_code = {"Unaffected": "1", "Affected": "2", "Unknown": "0"}[selected_aff]
-            pat_id = father.strip() if father != "None" else "0"
-            mat_id = mother.strip() if mother != "None" else "0"
-    
-            row = "\t".join(["FAM001", sample.strip(), pat_id, mat_id, sex_code, aff_code])
-            ped_rows.append(row)
-    
-            if selected_aff == "Affected":
-                proband_list.append(sample.strip())
-    
-    hpo_input = st.text_area("\U0001F9E0 HPO Terms (comma separated, optional)", key="hpo_input")
-    
-    if sample_names:
-        proband = st.selectbox("\U0001F9EC Select Proband", proband_list if proband_list else sample_names, key="proband_select")
-    
-    if ped_rows and vcf_path:
-        ped_text = "\n".join(ped_rows)
-        ped_file_path = os.path.join(
-            os.path.dirname(os.path.abspath(vcf_path)), "generated_family.ped"
-        )
-        with open(ped_file_path, "w") as f:
-            f.write(ped_text)
-        st.success(f"✅ PED file saved to: {ped_file_path}")
-        st.markdown("### 📄 PED Preview")
-        st.code(ped_text, language="text")
-    
-    if st.button("🛠️ Generate Exomiser YAML", key="gen_yaml") and vcf_path and ped_file_path:
-        vcf_abspath = os.path.abspath(vcf_path)
-        ped_abspath = os.path.abspath(ped_file_path)
-        has_hpo = bool(hpo_input.strip())
-        hpo_line = f"    hpoIds: [{hpo_input.strip()}]\n" if has_hpo else ""
-        hpo_step = "        hiPhivePrioritiser: {},\n" if has_hpo else ""
-
-        yaml_template = f"""## Exomiser Analysis Template.
----
-analysis:
-    genomeAssembly: hg38
-    vcf: {vcf_abspath}
-    ped: {ped_abspath}
-    proband: {proband}
-{hpo_line}    inheritanceModes: {{
-      AUTOSOMAL_DOMINANT: 0.1,
-      AUTOSOMAL_RECESSIVE_HOM_ALT: 0.1,
-      AUTOSOMAL_RECESSIVE_COMP_HET: 2.0,
-      X_DOMINANT: 0.1,
-      X_RECESSIVE_HOM_ALT: 0.1,
-      X_RECESSIVE_COMP_HET: 2.0,
-      MITOCHONDRIAL: 0.2
-    }}
-    analysisMode: PASS_ONLY
-    frequencySources: [
-        UK10K,
-        GNOMAD_E_AFR, GNOMAD_E_AMR, GNOMAD_E_EAS, GNOMAD_E_NFE, GNOMAD_E_SAS,
-        GNOMAD_G_AFR, GNOMAD_G_AMR, GNOMAD_G_EAS, GNOMAD_G_NFE, GNOMAD_G_SAS
-    ]
-    pathogenicitySources: [ REVEL, MVP ]
-    steps: [
-        failedVariantFilter: {{}},
-        variantEffectFilter: {{
-          remove: [
-              FIVE_PRIME_UTR_EXON_VARIANT, FIVE_PRIME_UTR_INTRON_VARIANT,
-              THREE_PRIME_UTR_EXON_VARIANT, THREE_PRIME_UTR_INTRON_VARIANT,
-              NON_CODING_TRANSCRIPT_EXON_VARIANT, NON_CODING_TRANSCRIPT_INTRON_VARIANT,
-              CODING_TRANSCRIPT_INTRON_VARIANT, UPSTREAM_GENE_VARIANT,
-              DOWNSTREAM_GENE_VARIANT, INTERGENIC_VARIANT, REGULATORY_REGION_VARIANT
-          ]
-        }},
-        frequencyFilter: {{maxFrequency: 2.0}},
-        pathogenicityFilter: {{keepNonPathogenic: true}},
-        inheritanceFilter: {{}},
-        omimPrioritiser: {{}},
-{hpo_step}    ]
-outputOptions:
-    outputContributingVariantsOnly: false
-    numGenes: 0
-    outputFileName: {proband}-exomiser-output
-    outputFormats: [HTML, JSON, TSV_GENE, TSV_VARIANT, VCF]
-"""
-    
-        yaml_file_path = os.path.abspath(f"{proband}_exomiser_config.yaml")
-        with open(yaml_file_path, "w") as f:
-            f.write(yaml_template)
-    
-        st.session_state.yaml_ready = True
-        st.session_state.yaml_path = yaml_file_path
-    
-        st.success(f"✅ YAML file saved to {yaml_file_path}")
-        st.markdown("### 📄 YAML Preview")
-        st.code(yaml_template, language="yaml")
-    
-    if st.session_state.yaml_ready:
-        st.markdown("## ▶️ Run Exomiser Analysis")
-        if st.button("🚀 Start Exomiser Now", key="run_exomiser"):
-            try:
-                yaml_path = st.session_state.yaml_path
-                cmd = [
-                    "java", "-jar",
-                    "/home/farismeqdam/exomiser-cli-14.1.0/exomiser-cli-14.1.0.jar",
-                    "--analysis", yaml_path,
-                    "--spring.config.location=file:/home/farismeqdam/exomiser-cli-14.1.0/application.properties"
-                ]
-                st.markdown("### 🧪 Terminal Output")
-                terminal_output = st.empty()
-                process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    bufsize=1
-                )
-                output_lines = []
-                for line in process.stdout:
-                    output_lines.append(line)
-                    terminal_output.code("".join(output_lines[-30:]))
-    
-                process.wait()
-                if process.returncode == 0:
-                    st.success("✅ Exomiser completed successfully.")
-                    output_html = f"{proband}-exomiser-output.html"
-                    result_path = os.path.join(os.getcwd(), "results", output_html)
-                    if os.path.exists(result_path):
-                        st.session_state.exomiser_html_path = result_path
-                        with open(result_path, "r", encoding="utf-8") as html_file:
-                            html_data = html_file.read()
-                        st.components.v1.html(html_data, height=700, scrolling=True)
-                        st.download_button("📥 Download HTML Report", html_data, file_name=output_html, mime="text/html")
-                        if st.button("📤 Upload to AI", key="upload_to_ai"):
-                            st.session_state.exomiser_auto_upload = True
-                            st.session_state.file_processed = False
-                            st.session_state.last_uploaded_filename = None
-                            st.session_state.input_choice = "Upload Exomiser HTML report"
-                    else:
-                        st.warning("⚠️ HTML output not found.")
-                else:
-                    st.error("❌ Exomiser exited with errors.")
-    
-                st.download_button("📥 Download Full Log", "".join(output_lines), file_name="exomiser_run.log")
-    
-            except Exception as e:
-                st.error(f"❌ Failed to run Exomiser: {e}")
-    st.stop()
-    
- # Add manual text input section
+# Add manual text input section
 if language == "English":
     manual_user_input = st.text_area("Enter variants ex: rs1228544607 or chr6:160585140-T>G (one per line):", height=150)
 else:
@@ -1043,20 +830,8 @@ manual_phenotypes = [p.strip() for p in user_input_ph.split('\n') if p.strip()]
 # Limit to 20 phenotypes
 manual_phenotypes = manual_phenotypes[:20]
 
-if input_choice == "Upload Exomiser HTML report":
-    uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["html"], key="html_uploader")
-if st.session_state.get("exomiser_auto_upload") and st.session_state.get("exomiser_html_path"):
-    try:
-        uploaded_file = open(st.session_state["exomiser_html_path"], "rb")
-        st.session_state.exomiser_auto_upload = False
-    except Exception as e:
-        st.error(f"Failed to load generated HTML file: {e}")
-elif uploaded_file is None and st.session_state.get("exomiser_html_path"):
-    try:
-        uploaded_file = open(st.session_state["exomiser_html_path"], "rb")
-    except Exception as e:
-        st.error(f"Failed to load generated HTML file: {e}")
-            
+uploaded_file = st.file_uploader("Upload Exomiser HTML file", type=["vcf", "txt", "json", "html"])
+
 # Initialize file variants and phenotypes in session state if not exists
 if 'file_variants' not in st.session_state:
     st.session_state.file_variants = []
@@ -1489,3 +1264,4 @@ if chat_message := st.chat_input("I can help explain diseases!"):
             st.write(response)
             # Append assistant response to chat history
             st.session_state["messages"].append({"role": "assistant", "content": response})
+
