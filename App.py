@@ -215,7 +215,6 @@ def extract_hpo_ids(html_content, max_hpos=20):
     return hpo_matches[:max_hpos]
 
 # === Load HPO ontology ===
-print("Loading HPO ontology...")
 #graph = obonet.read_obo('hp.obo')
 
 graph = obonet.read_obo('https://raw.githubusercontent.com/wah644/streamlit_app.py/main/hp.obo')
