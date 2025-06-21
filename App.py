@@ -137,7 +137,8 @@ if "phenotypes" not in st.session_state:
 
 
 #read gene-disease-curation file
-file_url = 'https://github.com/wah644/streamlit_app.py/blob/main/Clingen-Gene-Disease-Summary-2025-01-03.csv?raw=true'
+file_url = 'https://raw.githubusercontent.com/wah644/streamlit_app.py/main/Clingen-Gene-Disease-Summary-2025-01-03.csv'
+
 df = pd.read_csv(file_url)
 
 # Define the initial system message for variant input formatting
@@ -215,7 +216,9 @@ def extract_hpo_ids(html_content, max_hpos=20):
 
 # === Load HPO ontology ===
 print("Loading HPO ontology...")
-graph = obonet.read_obo('hp.obo')
+#graph = obonet.read_obo('hp.obo')
+
+graph = obonet.read_obo('https://raw.githubusercontent.com/wah644/streamlit_app.py/main/hp.obo')
 
 def get_hpo_name(hpo_id):
     node = graph.nodes.get(hpo_id)
