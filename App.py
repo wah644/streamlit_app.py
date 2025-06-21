@@ -215,7 +215,7 @@ def extract_hpo_ids(html_content, max_hpos=20):
 
 # === Load HPO ontology ===
 print("Loading HPO ontology...")
-graph = obonet.read_obo('http://purl.obolibrary.org/obo/hp.obo')
+graph = obonet.read_obo('hp.obo')
 
 def get_hpo_name(hpo_id):
     node = graph.nodes.get(hpo_id)
